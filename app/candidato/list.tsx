@@ -1,10 +1,10 @@
 import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import { Picker } from '@react-native-picker/picker';
-import Icon from 'react-native-vector-icons/FontAwesome'; // Importando os ícones
+import Icon from 'react-native-vector-icons/FontAwesome'; // Ícones para visualização
 
 interface Candidato {
   id: number;
@@ -28,7 +28,6 @@ export default function CandidatoList() {
   const [loading, setLoading] = useState<boolean>(true);
   const router = useRouter();
 
-  // Função para buscar os candidatos
   const fetchCandidatos = async () => {
     try {
       setLoading(true);
@@ -41,7 +40,6 @@ export default function CandidatoList() {
     }
   };
 
-  // Função para buscar as opções de status
   const fetchStatusOptions = async () => {
     try {
       const response = await axios.get('http://ggustac-002-site1.htempurl.com/api/Candidato/tipoStatus');
@@ -51,7 +49,6 @@ export default function CandidatoList() {
     }
   };
 
-  // Recarregar a lista de candidatos e status sempre que a tela ganhar foco
   useFocusEffect(
     useCallback(() => {
       fetchCandidatos();
@@ -59,45 +56,47 @@ export default function CandidatoList() {
     }, [])
   );
 
-  // Função para alterar o status do candidato
   const alterarStatus = async (id: number, newStatusId: number) => {
+    const candidatoAtual = candidatos.find((candidato) => candidato.id === id);
+
+    if (!candidatoAtual || candidatoAtual.idStatus === newStatusId) {
+      return; // Não fazer nada se o status não mudou
+    }
+
     try {
       await axios.patch(
         `http://ggustac-002-site1.htempurl.com/api/Candidato/${id}/mudarStatus`,
-        newStatusId, // Enviar apenas o valor do idStatus
+        JSON.stringify(newStatusId),
         {
           headers: {
-            'Content-Type': 'application/json', // Definir o tipo de conteúdo como JSON
+            'Content-Type': 'application/json',
           },
         }
       );
       Alert.alert('Sucesso', 'Status do candidato alterado com sucesso!');
-      fetchCandidatos(); // Atualizar a lista após a mudança
+      fetchCandidatos(); // Atualiza a lista após a mudança
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error('Erro ao alterar status do candidato:', error.response?.data);
-        Alert.alert('Erro', `Ocorreu um erro ao alterar o status do candidato: ${error.response?.data}`);
-      } else {
-        console.error('Erro desconhecido:', error);
-        Alert.alert('Erro', 'Ocorreu um erro desconhecido ao alterar o status do candidato.');
-      }
+      console.error('Erro ao alterar status do candidato:', error);
+      Alert.alert('Erro', 'Ocorreu um erro ao alterar o status do candidato.');
     }
   };
 
   const renderCandidato = ({ item }: { item: Candidato }) => (
     <View style={styles.candidatoContainer}>
-      <TouchableOpacity onPress={() => router.push({ pathname: './form', params: { id: item.id } })}>
-        <Text style={styles.candidatoName}>Nome Completo: {item.nomeCompleto}</Text>
-        <Text>Nome Urna: {item.nomeUrna}</Text>
-        <Text>UF: {item.uf}</Text>
-        <Text>Município: {item.municipio}</Text>
-      </TouchableOpacity>
+      <View style={styles.candidatoInfo}>
+        <TouchableOpacity onPress={() => router.push({ pathname: './form', params: { id: item.id } })}>
+          <Text style={styles.candidatoName}>Nome Completo: {item.nomeCompleto}</Text>
+          <Text>Nome Urna: {item.nomeUrna}</Text>
+          <Text>UF: {item.uf}</Text>
+          <Text>Município: {item.municipio}</Text>
+        </TouchableOpacity>
+      </View>
 
       <View style={styles.actionContainer}>
         <Text>Status:</Text>
         <Picker
           selectedValue={item.idStatus}
-          onValueChange={(value) => alterarStatus(item.id, value)} // Altera o status ao selecionar
+          onValueChange={(value) => alterarStatus(item.id, value)}
           style={styles.picker}
         >
           {statusOptions.map((status) => (
@@ -105,7 +104,6 @@ export default function CandidatoList() {
           ))}
         </Picker>
 
-        {/* Ícone de "olho" para visualizar/editar o candidato */}
         <TouchableOpacity onPress={() => router.push({ pathname: './form', params: { id: item.id } })}>
           <Icon name="eye" size={24} color="#007bff" style={styles.icon} />
         </TouchableOpacity>
@@ -149,19 +147,22 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     borderWidth: 1,
   },
+  candidatoInfo: {
+    marginBottom: 10,
+  },
   candidatoName: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 5,
   },
   actionContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    marginTop: 10,
   },
   picker: {
-    height: 50,
-    width: '70%',
+    height: 40,
+    width: '60%',
   },
   icon: {
     marginLeft: 10,

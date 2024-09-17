@@ -70,7 +70,6 @@ export default function CandidatoForm() {
       .catch(error => console.error('Erro ao carregar estados:', error));
   }, []);
 
-  // Carregar municípios quando um estado é selecionado
   useEffect(() => {
     if (uf) {
       axios.get<Municipio[]>(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${uf}/municipios`)
@@ -103,7 +102,6 @@ export default function CandidatoForm() {
     }
   }, [id]);
 
-  // Função para aplicar máscara na data e formatá-la
   const handleDateChange = (text: string) => {
     const cleaned = text.replace(/[^0-9]/g, '');
     let formatted = cleaned;
@@ -116,19 +114,16 @@ export default function CandidatoForm() {
     setDataNascimento(formatted);
   };
 
-  // Função para formatar data para exibição
   const formatDateForDisplay = (dateString: string) => {
     const [year, month, day] = dateString.split('T')[0].split('-');
     return `${day}/${month}/${year}`;
   };
 
-  // Função para converter a data para o formato ISO
   const formatDateForApi = (dateString: string) => {
     const [day, month, year] = dateString.split('/');
     return `${year}-${month}-${day}T00:00:00.000Z`;
   };
 
-  // Função para limpar os campos do formulário
   const clearFields = () => {
     setNomeCompleto('');
     setNomeUrna('');
@@ -141,7 +136,6 @@ export default function CandidatoForm() {
     setIdCargoDisputado(0);
   };
 
-  // Função para salvar ou atualizar o candidato
   const handleSave = () => {
     const formattedDate = formatDateForApi(dataNascimento);
 
@@ -165,7 +159,7 @@ export default function CandidatoForm() {
         .then(() => {
           Alert.alert('Sucesso', 'Candidato atualizado com sucesso!');
           clearFields();
-          router.push('/candidato/list'); // Volta para a lista de candidatos
+          router.push('/candidato/list');
         })
         .catch(error => {
           console.error('Erro ao atualizar candidato (detalhes):', error.response?.data);
@@ -176,7 +170,7 @@ export default function CandidatoForm() {
         .then(() => {
           Alert.alert('Sucesso', 'Candidato cadastrado com sucesso!');
           clearFields();
-          router.push('/candidato/list'); // Volta para a lista de candidatos
+          router.push('/candidato/list');
         })
         .catch(error => {
           console.error('Erro ao cadastrar candidato (detalhes):', error.response?.data);
