@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, ScrollView, ActivityIndicator, Alert, Image } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, ScrollView, ActivityIndicator, Alert, Image, TouchableOpacity } from 'react-native';
 import axios from 'axios';
 import { Picker } from '@react-native-picker/picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
-// Definindo interfaces para os dados da API
 interface Status {
   id: number;
   nome: string;
@@ -51,7 +50,6 @@ export default function CandidatoForm() {
   const router = useRouter();
 
   useEffect(() => {
-    // Carregar os dados das APIs para os selects
     axios.get<Status[]>('http://ggustac-002-site1.htempurl.com/api/Candidato/tipoStatus')
       .then(response => setStatusOptions(response.data))
       .catch(error => console.error('Erro ao carregar status:', error));
@@ -64,7 +62,6 @@ export default function CandidatoForm() {
       .then(response => setCargoOptions(response.data))
       .catch(error => console.error('Erro ao carregar cargos:', error));
 
-    // Carregar estados do IBGE
     axios.get<UF[]>('https://servicodados.ibge.gov.br/api/v1/localidades/estados')
       .then(response => setUfOptions(response.data))
       .catch(error => console.error('Erro ao carregar estados:', error));
@@ -152,8 +149,6 @@ export default function CandidatoForm() {
       idCargoDisputado: parseInt(idCargoDisputado as string, 10),
     };
 
-    console.log('Dados do candidato a serem enviados:', candidato);
-
     if (id) {
       axios.put(`http://ggustac-002-site1.htempurl.com/api/Candidato/${id}`, candidato)
         .then(() => {
@@ -184,7 +179,7 @@ export default function CandidatoForm() {
   }
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
       <Text style={styles.title}>{id ? 'Editar Candidato' : 'Cadastro de Candidato'}</Text>
 
       <Text>Nome Completo</Text>
@@ -281,16 +276,24 @@ export default function CandidatoForm() {
         ))}
       </Picker>
 
-      <Button title={id ? "Atualizar Candidato" : "Cadastrar Candidato"} onPress={handleSave} />
-      <Button title="Voltar" onPress={() => router.push('/candidato/list')} />
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity style={styles.button} onPress={handleSave}>
+          <Text style={styles.buttonText}>{id ? "Atualizar Candidato" : "Cadastrar Candidato"}</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.button} onPress={() => router.push('/candidato/list')}>
+          <Text style={styles.buttonText}>Voltar</Text>
+        </TouchableOpacity>
+      </View>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  scrollContainer: {
     padding: 20,
+    flexGrow: 1,
+    justifyContent: 'center',
   },
   title: {
     fontSize: 24,
@@ -312,5 +315,22 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 200,
     marginTop: 10,
+  },
+  buttonContainer: {
+    marginTop: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  button: {
+    backgroundColor: '#007bff',
+    padding: 15,
+    borderRadius: 5,
+    flex: 1,
+    alignItems: 'center',
+    marginHorizontal: 5,
+  },
+  buttonText: {
+    color: '#fff',
+    fontWeight: 'bold',
   },
 });

@@ -1,10 +1,5 @@
-import { Stack } from "expo-router";
+import DrawerNavigator from './drawer'; // Importando o DrawerNavigator sem NavigationContainer
 
 export default function RootLayout() {
-  return (
-    <Stack>
-      <Stack.Screen name="index" /> {/* Aponta para /app/index.tsx */}
-      <Stack.Screen name="candidato/form" /> {/* Será mapeado para /app/candidato/form.tsx */}
-    </Stack>
-  );
+  return <DrawerNavigator />; // Usando apenas o Drawer como a navegação principal
 }
