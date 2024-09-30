@@ -4,7 +4,7 @@ import axios from 'axios';
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import { Picker } from '@react-native-picker/picker';
-import Icon from 'react-native-vector-icons/FontAwesome'; // Ícones para visualização
+import Icon from 'react-native-vector-icons/FontAwesome'; // Usando FontAwesome
 
 interface Candidato {
   id: number;
@@ -60,7 +60,7 @@ export default function CandidatoList() {
     const candidatoAtual = candidatos.find((candidato) => candidato.id === id);
 
     if (!candidatoAtual || candidatoAtual.idStatus === newStatusId) {
-      return; // Não fazer nada se o status não mudou
+      return;
     }
 
     try {
@@ -74,7 +74,7 @@ export default function CandidatoList() {
         }
       );
       Alert.alert('Sucesso', 'Status do candidato alterado com sucesso!');
-      fetchCandidatos(); // Atualiza a lista após a mudança
+      fetchCandidatos(); 
     } catch (error) {
       console.error('Erro ao alterar status do candidato:', error);
       Alert.alert('Erro', 'Ocorreu um erro ao alterar o status do candidato.');
@@ -115,10 +115,9 @@ export default function CandidatoList() {
     <View style={styles.container}>
       <Text style={styles.title}>Lista de Candidatos</Text>
 
-      {/* Botão de Cadastrar Candidato */}
       <TouchableOpacity
         style={styles.cadastrarButton}
-        onPress={() => router.push('./form')}  // Redireciona para o formulário de cadastro
+        onPress={() => router.push('./form')}  
       >
         <Text style={styles.cadastrarButtonText}>Cadastrar Candidato</Text>
       </TouchableOpacity>

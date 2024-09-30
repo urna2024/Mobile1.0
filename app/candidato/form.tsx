@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, ScrollView, ActivityIndicator, Alert, Image, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, StyleSheet, ScrollView, ActivityIndicator, Image, TouchableOpacity } from 'react-native';
 import axios from 'axios';
 import { Picker } from '@react-native-picker/picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 interface Status {
   id: number;
@@ -31,7 +32,7 @@ interface Municipio {
 }
 
 export default function CandidatoForm() {
-  const { id } = useLocalSearchParams();
+  const { id } = useLocalSearchParams(); 
   const [nomeCompleto, setNomeCompleto] = useState('');
   const [nomeUrna, setNomeUrna] = useState('');
   const [dataNascimento, setDataNascimento] = useState('');
@@ -41,13 +42,26 @@ export default function CandidatoForm() {
   const [idStatus, setIdStatus] = useState<number | string>(0);
   const [idPartidoPolitico, setIdPartidoPolitico] = useState<number | string>(0);
   const [idCargoDisputado, setIdCargoDisputado] = useState<number | string>(0);
+
   const [statusOptions, setStatusOptions] = useState<Status[]>([]);
   const [partidoOptions, setPartidoOptions] = useState<PartidoPolitico[]>([]);
   const [cargoOptions, setCargoOptions] = useState<CargoDisputado[]>([]);
   const [ufOptions, setUfOptions] = useState<UF[]>([]);
   const [municipioOptions, setMunicipioOptions] = useState<Municipio[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [message, setMessage] = useState<string | null>(null); 
+  const [messageType, setMessageType] = useState<'success' | 'error' | null>(null); 
   const router = useRouter();
+
+  
+  const showMessage = (type: 'success' | 'error', msg: string) => {
+    setMessageType(type);
+    setMessage(msg);
+    setTimeout(() => {
+      setMessage(null); 
+    }, 3000); 
+  };
+
 
   useEffect(() => {
     axios.get<Status[]>('http://ggustac-002-site1.htempurl.com/api/Candidato/tipoStatus')
@@ -83,7 +97,7 @@ export default function CandidatoForm() {
           const candidato = response.data;
           setNomeCompleto(candidato.nomeCompleto);
           setNomeUrna(candidato.nomeUrna);
-          setDataNascimento(formatDateForDisplay(candidato.dataNascimento));
+          setDataNascimento(candidato.dataNascimento.split('T')[0]);
           setUf(candidato.uf);
           setMunicipio(candidato.municipio);
           setFoto(candidato.foto);
@@ -93,8 +107,8 @@ export default function CandidatoForm() {
           setLoading(false);
         })
         .catch(error => {
-          console.error('Erro ao buscar detalhes do candidato:', error);
           setLoading(false);
+          showMessage('error', 'Erro ao buscar detalhes do candidato.');
         });
     }
   }, [id]);
@@ -111,14 +125,18 @@ export default function CandidatoForm() {
     setDataNascimento(formatted);
   };
 
-  const formatDateForDisplay = (dateString: string) => {
-    const [year, month, day] = dateString.split('T')[0].split('-');
-    return `${day}/${month}/${year}`;
-  };
-
   const formatDateForApi = (dateString: string) => {
     const [day, month, year] = dateString.split('/');
     return `${year}-${month}-${day}T00:00:00.000Z`;
+  };
+
+  const isValidUrl = (url: string) => {
+    try {
+      new URL(url);
+      return true;
+    } catch (e) {
+      return false;
+    }
   };
 
   const clearFields = () => {
@@ -152,24 +170,22 @@ export default function CandidatoForm() {
     if (id) {
       axios.put(`http://ggustac-002-site1.htempurl.com/api/Candidato/${id}`, candidato)
         .then(() => {
-          Alert.alert('Sucesso', 'Candidato atualizado com sucesso!');
+          showMessage('success', 'Candidato atualizado com sucesso!');
           clearFields();
           router.push('/candidato/list');
         })
         .catch(error => {
-          console.error('Erro ao atualizar candidato (detalhes):', error.response?.data);
-          Alert.alert('Erro', `Ocorreu um erro ao atualizar o candidato: ${JSON.stringify(error.response?.data)}`);
+          showMessage('error', 'Erro ao atualizar candidato.');
         });
     } else {
       axios.post('http://ggustac-002-site1.htempurl.com/api/Candidato', candidato)
         .then(() => {
-          Alert.alert('Sucesso', 'Candidato cadastrado com sucesso!');
+          showMessage('success', 'Candidato cadastrado com sucesso!');
           clearFields();
           router.push('/candidato/list');
         })
         .catch(error => {
-          console.error('Erro ao cadastrar candidato (detalhes):', error.response?.data);
-          Alert.alert('Erro', `Ocorreu um erro ao cadastrar o candidato: ${JSON.stringify(error.response?.data)}`);
+          showMessage('error', 'Erro ao cadastrar candidato.');
         });
     }
   };
@@ -181,6 +197,12 @@ export default function CandidatoForm() {
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <Text style={styles.title}>{id ? 'Editar Candidato' : 'Cadastro de Candidato'}</Text>
+
+      {message && (
+        <View style={[styles.messageBox, messageType === 'success' ? styles.successBox : styles.errorBox]}>
+          <Text style={styles.messageText}>{message}</Text>
+        </View>
+      )}
 
       <Text>Nome Completo</Text>
       <TextInput
@@ -235,10 +257,14 @@ export default function CandidatoForm() {
       <TextInput
         style={styles.input}
         value={foto}
-        onChangeText={setFoto}
+        onChangeText={(text) => isValidUrl(text) ? setFoto(text) : showMessage('error', 'URL inválida')}
         placeholder="URL da Foto"
       />
-      {foto ? <Image source={{ uri: foto }} style={styles.image} /> : null}
+      {foto && isValidUrl(foto) ? (
+        <Image source={{ uri: foto }} style={styles.image} onError={() => showMessage('error', 'Erro ao carregar a imagem')} />
+      ) : (
+        <Text>Nenhuma imagem disponível</Text>
+      )}
 
       <Text>Status</Text>
       <Picker
@@ -281,8 +307,9 @@ export default function CandidatoForm() {
           <Text style={styles.buttonText}>{id ? "Atualizar Candidato" : "Cadastrar Candidato"}</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.button} onPress={() => router.push('/candidato/list')}>
-          <Text style={styles.buttonText}>Voltar</Text>
+        <TouchableOpacity style={styles.backButton} onPress={() => router.push('/candidato/list')}>
+          <Icon name="arrow-left" size={24} color="#007bff" />
+          <Text style={styles.backButtonText}>Voltar</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -332,5 +359,36 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#fff',
     fontWeight: 'bold',
+  },
+  backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 20,
+    backgroundColor: '#f0f0f0',
+    padding: 10,
+    borderRadius: 5,
+  },
+  backButtonText: {
+    color: '#007bff',
+    fontSize: 16,
+    marginLeft: 10, // Espaço entre o ícone e o texto
+  },
+  messageBox: {
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 15,
+  },
+  successBox: {
+    backgroundColor: '#d4edda',
+    borderColor: '#c3e6cb',
+  },
+  errorBox: {
+    backgroundColor: '#f8d7da',
+    borderColor: '#f5c6cb',
+  },
+  messageText: {
+    color: '#155724',
+    fontSize: 16,
+    textAlign: 'center',
   },
 });

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
 import axios from 'axios';
 import { Picker } from '@react-native-picker/picker';
+import FlashMessage, { showMessage } from 'react-native-flash-message';  
 
 interface Status {
   id: number;
@@ -14,65 +15,64 @@ interface PerfilUsuario {
 }
 
 export default function CadastroUsuario() {
-  // Estados para armazenar os valores dos campos
   const [nomeUsuario, setNomeUsuario] = useState('');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [idStatus, setIdStatus] = useState<number>(0);
   const [idPerfilUsuario, setIdPerfilUsuario] = useState<number>(0);
   const [precisaTrocarSenha, setPrecisaTrocarSenha] = useState(true);
-
-  // Estados para armazenar as opções do select
   const [statusOptions, setStatusOptions] = useState<Status[]>([]);
   const [perfilOptions, setPerfilOptions] = useState<PerfilUsuario[]>([]);
   const [loading, setLoading] = useState(true);
+  const [cadastrando, setCadastrando] = useState(false);
 
-  // Função para buscar opções de Status e Perfis de Usuário
   const fetchOptions = async () => {
     try {
-      // Busca as opções de Status
       const statusResponse = await axios.get('http://ggustac-002-site1.htempurl.com/api/Candidato/tipoStatus');
-      console.log('Status Options:', statusResponse.data);  // Verificar se os dados estão sendo recebidos corretamente
       setStatusOptions(statusResponse.data);
 
-      // Busca as opções de Perfis de Usuário
-      const perfilResponse = await axios.get('http://ggustac-002-site1.htempurl.com/api/PerfilUsuario'); // Substitua pela rota correta
-      console.log('Perfil Options:', perfilResponse.data);  // Verificar se os dados estão sendo recebidos corretamente
+      const perfilResponse = await axios.get('http://ggustac-002-site1.htempurl.com/api/Usuario/tipoPerfilUsuario');
       setPerfilOptions(perfilResponse.data);
 
-      setLoading(false); // Para o spinner
+      setLoading(false);
     } catch (error) {
-      console.error('Erro ao carregar opções:', error);
-      Alert.alert('Erro', 'Ocorreu um erro ao carregar as opções.');
+      showMessage({
+        message: 'Erro',
+        description: 'Ocorreu um erro ao carregar as opções.',
+        type: 'danger',
+      });
       setLoading(false);
     }
   };
 
-  // UseEffect para buscar as opções assim que o componente é montado
   useEffect(() => {
     fetchOptions();
   }, []);
 
-  // Função para cadastrar usuário
   const handleCadastro = async () => {
-    // Dados a serem enviados para a API
+    setCadastrando(true);
     const dadosUsuario = {
       nomeUsuario,
       email,
       senha,
-      idStatus: idStatus,
-      idPerfilUsuario: idPerfilUsuario,
+      idStatus,
+      idPerfilUsuario,
       precisaTrocarSenha,
     };
 
     try {
-      // Fazer a requisição POST para a API
       const response = await axios.post('http://ggustac-002-site1.htempurl.com/api/Usuario', dadosUsuario);
+
       
-      // Sucesso
-      Alert.alert('Sucesso', 'Usuário cadastrado com sucesso!');
-      
-      // Limpar campos após o cadastro
+      showMessage({
+        message: 'Sucesso',
+        description: 'Usuário cadastrado com sucesso!',
+        type: 'success',
+        icon: 'success',
+        duration: 3000, 
+      });
+
+     
       setNomeUsuario('');
       setEmail('');
       setSenha('');
@@ -81,7 +81,15 @@ export default function CadastroUsuario() {
       setPrecisaTrocarSenha(true);
     } catch (error) {
       console.error('Erro ao cadastrar usuário:', error);
-      Alert.alert('Erro', 'Ocorreu um erro ao cadastrar o usuário.');
+      showMessage({
+        message: 'Erro',
+        description: 'Ocorreu um erro ao cadastrar o usuário.',
+        type: 'danger',
+        icon: 'danger',
+        duration: 3000,
+      });
+    } finally {
+      setCadastrando(false);
     }
   };
 
@@ -92,7 +100,7 @@ export default function CadastroUsuario() {
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.title}>Cadastro de Usuário</Text>
-      
+
       <Text>Nome de Usuário</Text>
       <TextInput
         style={styles.input}
@@ -143,7 +151,14 @@ export default function CadastroUsuario() {
         ))}
       </Picker>
 
-      <Button title="Cadastrar Usuário" onPress={handleCadastro} />
+      <Button
+        title={cadastrando ? "Cadastrando..." : "Cadastrar Usuário"}
+        onPress={handleCadastro}
+        disabled={cadastrando}
+      />
+
+     
+      <FlashMessage position="top" />
     </ScrollView>
   );
 }
