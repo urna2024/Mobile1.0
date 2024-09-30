@@ -7,7 +7,7 @@ import { useRouter } from 'expo-router';
 
 interface Candidato {
   id: number;
-  nome: string;
+  nomeUrna: string;
   partido: string;
   foto: string;
 }
@@ -23,8 +23,8 @@ interface Municipio {
 }
 
 export default function PesquisaEleitoralForm() {
-  const [uf, setUf] = useState<string>('');
-  const [municipio, setMunicipio] = useState<string>('');
+  const [uf, setUf] = useState<string>(''); // Apenas sigla da UF
+  const [municipio, setMunicipio] = useState<string>(''); // Nome do município
   const [municipios, setMunicipios] = useState<Municipio[]>([]);
   const [votoIndeciso, setVotoIndeciso] = useState(false);
   const [votoBrancoNulo, setVotoBrancoNulo] = useState(false);
@@ -56,7 +56,7 @@ export default function PesquisaEleitoralForm() {
       .catch(error => console.error('Erro ao carregar estados:', error));
   }, []);
 
-  // Carregar municípios com base no UF selecionado
+  // Carregar municípios com base na UF selecionada
   useEffect(() => {
     if (uf) {
       axios.get<Municipio[]>(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${uf}/municipios`)
@@ -65,30 +65,33 @@ export default function PesquisaEleitoralForm() {
     }
   }, [uf]);
 
-  // Carregar opções de candidatos a prefeito e vereador
+  // Carregar candidatos a prefeito e vereador com base na UF e município selecionados
   useEffect(() => {
-    axios.get<Candidato[]>('http://ggustac-002-site1.htempurl.com/api/PesquisaEleitoral/resultados/prefeitos')
-      .then(response => setCandidatosPrefeito(response.data))
-      .catch(error => console.error('Erro ao carregar candidatos a prefeito:', error));
+    if (uf && municipio) {
+      axios.get<Candidato[]>(`http://ggustac-002-site1.htempurl.com/api/PesquisaEleitoral/prefeitos?uf=${uf}&municipio=${municipio}`)
+        .then(response => setCandidatosPrefeito(response.data))
+        .catch(error => console.error('Erro ao carregar candidatos a prefeito:', error));
 
-    axios.get<Candidato[]>('http://ggustac-002-site1.htempurl.com/api/PesquisaEleitoral/resultados/vereadores')
-      .then(response => setCandidatosVereador(response.data))
-      .catch(error => console.error('Erro ao carregar candidatos a vereador:', error));
+      axios.get<Candidato[]>(`http://ggustac-002-site1.htempurl.com/api/PesquisaEleitoral/vereadores?uf=${uf}&municipio=${municipio}`)
+        .then(response => setCandidatosVereador(response.data))
+        .catch(error => console.error('Erro ao carregar candidatos a vereador:', error));
+    }
+  }, [uf, municipio]);
 
-   
-    axios.get('http://ggustac-002-site1.htempurl.com/api/PesquisaEleitoral/resultados/genero')
+  // Carregar generos, níveis de escolaridade e rendas familiares
+  useEffect(() => {
+    axios.get('http://ggustac-002-site1.htempurl.com/api/PesquisaEleitoral/generos')
       .then(response => setGeneros(response.data))
       .catch(error => console.error('Erro ao carregar gêneros:', error));
 
-    axios.get('http://ggustac-002-site1.htempurl.com/api/NivelEscolaridade')
+    axios.get('http://ggustac-002-site1.htempurl.com/api/PesquisaEleitoral/nivelEscolaridade')
       .then(response => setEscolaridades(response.data))
       .catch(error => console.error('Erro ao carregar níveis de escolaridade:', error));
 
-    axios.get('http://ggustac-002-site1.htempurl.com/api/RendaFamiliar')
+    axios.get('http://ggustac-002-site1.htempurl.com/api/PesquisaEleitoral/rendaFamiliar')
       .then(response => setRendas(response.data))
       .catch(error => console.error('Erro ao carregar rendas familiares:', error));
   }, []);
-
 
   const handleSelectCandidatoPrefeito = (id: number) => {
     setIdCandidatoPrefeito(id);
@@ -99,7 +102,6 @@ export default function PesquisaEleitoralForm() {
     }
   };
 
-  
   const handleSelectCandidatoVereador = (id: number) => {
     setIdCandidatoVereador(id);
     if (id !== 0) {
@@ -109,7 +111,16 @@ export default function PesquisaEleitoralForm() {
     }
   };
 
+  // Função para formatar a data em "DD/MM/AAAA"
+  const formatarData = (data: string) => {
+    const [ano, mes, dia] = data.split('-');
+    return `${dia}/${mes}/${ano}`;
+  };
+
   const handleSave = () => {
+    // Convertendo a data de nascimento para o formato correto
+    const dataNascimentoFormatada = formatarData(entrevistadoDataNascimento);
+
     const pesquisaData = {
       dataEntrevista: new Date().toISOString(),
       uf,
@@ -123,7 +134,7 @@ export default function PesquisaEleitoralForm() {
       idStatus: 1,
       entrevistado: [{
         nomeCompleto: entrevistadoNome,
-        dataNascimento: entrevistadoDataNascimento,
+        dataNascimento: dataNascimentoFormatada,
         uf,
         municipio,
         celular: entrevistadoCelular,
@@ -161,7 +172,7 @@ export default function PesquisaEleitoralForm() {
         style={styles.input}
         value={entrevistadoDataNascimento}
         onChangeText={setEntrevistadoDataNascimento}
-        placeholder="AAAA-MM-DD"
+        placeholder="DD/MM/AAAA"
       />
 
       <Text>Celular do Entrevistado</Text>
@@ -181,7 +192,7 @@ export default function PesquisaEleitoralForm() {
       >
         <Picker.Item label="Selecione o Estado" value="" />
         {ufs.map((uf) => (
-          <Picker.Item key={uf.sigla} label={uf.nome} value={uf.sigla} />
+          <Picker.Item key={uf.sigla} label={uf.sigla} value={uf.sigla} />
         ))}
       </Picker>
 
@@ -216,7 +227,7 @@ export default function PesquisaEleitoralForm() {
         onValueChange={setIdNivelEscolaridade}
         style={styles.picker}
       >
-             <Picker.Item label="Selecione o Nível de Escolaridade" value={0} />
+        <Picker.Item label="Selecione o Nível de Escolaridade" value={0} />
         {escolaridades.map((e) => (
           <Picker.Item key={e.id} label={e.nome} value={e.id} />
         ))}
@@ -259,10 +270,11 @@ export default function PesquisaEleitoralForm() {
         selectedValue={idCandidatoPrefeito}
         onValueChange={(itemValue: number) => handleSelectCandidatoPrefeito(itemValue)}
         style={styles.picker}
+        enabled={uf !== '' && municipio !== ''}
       >
         <Picker.Item label="Selecione um candidato" value={0} />
         {candidatosPrefeito.map(candidato => (
-          <Picker.Item key={candidato.id} label={candidato.nome} value={candidato.id} />
+          <Picker.Item key={candidato.id} label={candidato.nomeUrna} value={candidato.id} />
         ))}
       </Picker>
 
@@ -280,10 +292,11 @@ export default function PesquisaEleitoralForm() {
         selectedValue={idCandidatoVereador}
         onValueChange={(itemValue: number) => handleSelectCandidatoVereador(itemValue)}
         style={styles.picker}
+        enabled={uf !== '' && municipio !== ''}
       >
         <Picker.Item label="Selecione um candidato" value={0} />
         {candidatosVereador.map(candidato => (
-          <Picker.Item key={candidato.id} label={candidato.nome} value={candidato.id} />
+          <Picker.Item key={candidato.id} label={candidato.nomeUrna} value={candidato.id} />
         ))}
       </Picker>
 
@@ -379,4 +392,3 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
 });
-
