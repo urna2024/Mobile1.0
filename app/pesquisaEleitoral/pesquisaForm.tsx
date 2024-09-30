@@ -23,8 +23,8 @@ interface Municipio {
 }
 
 export default function PesquisaEleitoralForm() {
-  const [uf, setUf] = useState<string>(''); // Apenas sigla da UF
-  const [municipio, setMunicipio] = useState<string>(''); // Nome do município
+  const [uf, setUf] = useState<string>(''); 
+  const [municipio, setMunicipio] = useState<string>(''); 
   const [municipios, setMunicipios] = useState<Municipio[]>([]);
   const [votoIndeciso, setVotoIndeciso] = useState(false);
   const [votoBrancoNulo, setVotoBrancoNulo] = useState(false);
@@ -48,6 +48,25 @@ export default function PesquisaEleitoralForm() {
   const [candidatoVereadorDetalhes, setCandidatoVereadorDetalhes] = useState<Candidato | null>(null);
 
   const router = useRouter();
+
+  // Função para formatar o telefone (DDD e número)
+  const formatarTelefone = (telefone: string) => {
+    const apenasNumeros = telefone.replace(/\D/g, '');
+    if (apenasNumeros.length <= 10) {
+      return apenasNumeros.replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{4})(\d)/, '$1-$2');
+    } else {
+      return apenasNumeros.replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{5})(\d)/, '$1-$2');
+    }
+  };
+
+  // Função para formatar a data no formato "DD/MM/AAAA"
+  const formatarData = (data: string) => {
+    const apenasNumeros = data.replace(/\D/g, '');
+    if (apenasNumeros.length <= 8) {
+      return apenasNumeros.replace(/(\d{2})(\d)/, '$1/$2').replace(/(\d{2})(\d)/, '$1/$2');
+    }
+    return data;
+  };
 
   // Carregar estados (UF) da API do IBGE
   useEffect(() => {
@@ -111,16 +130,7 @@ export default function PesquisaEleitoralForm() {
     }
   };
 
-  // Função para formatar a data em "DD/MM/AAAA"
-  const formatarData = (data: string) => {
-    const [ano, mes, dia] = data.split('-');
-    return `${dia}/${mes}/${ano}`;
-  };
-
   const handleSave = () => {
-    // Convertendo a data de nascimento para o formato correto
-    const dataNascimentoFormatada = formatarData(entrevistadoDataNascimento);
-
     const pesquisaData = {
       dataEntrevista: new Date().toISOString(),
       uf,
@@ -134,7 +144,7 @@ export default function PesquisaEleitoralForm() {
       idStatus: 1,
       entrevistado: [{
         nomeCompleto: entrevistadoNome,
-        dataNascimento: dataNascimentoFormatada,
+        dataNascimento: entrevistadoDataNascimento,
         uf,
         municipio,
         celular: entrevistadoCelular,
@@ -171,16 +181,17 @@ export default function PesquisaEleitoralForm() {
       <TextInput
         style={styles.input}
         value={entrevistadoDataNascimento}
-        onChangeText={setEntrevistadoDataNascimento}
+        onChangeText={(text) => setEntrevistadoDataNascimento(formatarData(text))}
         placeholder="DD/MM/AAAA"
+        keyboardType="numeric"
       />
 
       <Text>Celular do Entrevistado</Text>
       <TextInput
         style={styles.input}
         value={entrevistadoCelular}
-        onChangeText={setEntrevistadoCelular}
-        placeholder="Celular"
+        onChangeText={(text) => setEntrevistadoCelular(formatarTelefone(text))}
+        placeholder="(00) 00000-0000"
         keyboardType="phone-pad"
       />
 
