@@ -1,10 +1,10 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Alert, Image, KeyboardAvoidingView, Platform } from 'react-native';
 import axios from 'axios';
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import { Picker } from '@react-native-picker/picker';
-import Icon from 'react-native-vector-icons/FontAwesome'; // Usando FontAwesome
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 interface Candidato {
   id: number;
@@ -74,7 +74,7 @@ export default function CandidatoList() {
         }
       );
       Alert.alert('Sucesso', 'Status do candidato alterado com sucesso!');
-      fetchCandidatos(); 
+      fetchCandidatos();
     } catch (error) {
       console.error('Erro ao alterar status do candidato:', error);
       Alert.alert('Erro', 'Ocorreu um erro ao alterar o status do candidato.');
@@ -112,26 +112,46 @@ export default function CandidatoList() {
   );
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Lista de Candidatos</Text>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Image source={require('../../assets/images/logo.jpeg')} style={styles.logo} />
+          <Text style={styles.title}>Lista de Candidatos</Text>
+        </View>
 
-      <TouchableOpacity
-        style={styles.cadastrarButton}
-        onPress={() => router.push('./form')}  
-      >
-        <Text style={styles.cadastrarButtonText}>Cadastrar Candidato</Text>
-      </TouchableOpacity>
+        {loading ? (
+          <ActivityIndicator size="large" color="#0000ff" />
+        ) : (
+          <FlatList
+            data={candidatos}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={renderCandidato}
+            contentContainerStyle={{ paddingBottom: 100 }} // Ajusta o espaço no final para evitar sobreposição
+          />
+        )}
 
-      {loading ? (
-        <ActivityIndicator size="large" color="#0000ff" />
-      ) : (
-        <FlatList
-          data={candidatos}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={renderCandidato}
-        />
-      )}
-    </View>
+        <View style={styles.footer}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.push('/')}
+          >
+            <Icon name="arrow-left" size={24} color="#fff" />
+            <Text style={styles.backButtonText}>Voltar</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.cadastrarButton}
+            onPress={() => router.push('./form')}
+          >
+            <Icon name="plus" size={24} color="#fff" />
+            <Text style={styles.cadastrarButtonText}>Cadastrar Candidato</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -141,23 +161,21 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: '#f5f5f5',
   },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
+  logo: {
+    width: 50,
+    height: 50,
+    marginRight: 10,
+  },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 20,
     textAlign: 'center',
-  },
-  cadastrarButton: {
-    backgroundColor: '#007bff',
-    padding: 10,
-    borderRadius: 5,
-    marginBottom: 20,
-    alignItems: 'center',
-  },
-  cadastrarButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
   },
   candidatoContainer: {
     marginBottom: 15,
@@ -185,6 +203,36 @@ const styles = StyleSheet.create({
     width: '50%',
   },
   icon: {
+    marginLeft: 10,
+  },
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#007bff',
+    padding: 15,
+    marginTop: 10, // Remove position absolute e ajusta o layout
+  },
+  backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  backButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    marginLeft: 10,
+  },
+  cadastrarButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#007bff',
+    padding: 10,
+    borderRadius: 5,
+  },
+  cadastrarButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
     marginLeft: 10,
   },
 });

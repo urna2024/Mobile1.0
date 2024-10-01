@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
 import axios from 'axios';
 import { Picker } from '@react-native-picker/picker';
-import FlashMessage, { showMessage } from 'react-native-flash-message';  
+import FlashMessage, { showMessage } from 'react-native-flash-message';
 
 interface Status {
   id: number;
@@ -63,16 +63,16 @@ export default function CadastroUsuario() {
     try {
       const response = await axios.post('http://ggustac-002-site1.htempurl.com/api/Usuario', dadosUsuario);
 
-      
+
       showMessage({
         message: 'Sucesso',
         description: 'Usuário cadastrado com sucesso!',
         type: 'success',
         icon: 'success',
-        duration: 3000, 
+        duration: 3000,
       });
 
-     
+
       setNomeUsuario('');
       setEmail('');
       setSenha('');
@@ -157,7 +157,7 @@ export default function CadastroUsuario() {
         disabled={cadastrando}
       />
 
-     
+
       <FlashMessage position="top" />
     </ScrollView>
   );
