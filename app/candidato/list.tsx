@@ -82,7 +82,8 @@ export default function CandidatoList() {
 
   const renderCandidato = ({ item }: { item: Candidato }) => (
     <View style={styles.candidatoContainer}>
-      <TouchableOpacity onPress={() => router.push(`/candidatodetalhes`)}>
+      {/* Passe o ID do candidato corretamente como parâmetro */}
+      <TouchableOpacity onPress={() => router.push({ pathname: './detalhes', params: { id: item.id } })}>
         <View style={styles.candidatoInfo}>
           <Text style={styles.candidatoName}>Nome Completo: {item.nomeCompleto}</Text>
           <Text>Nome Urna: {item.nomeUrna}</Text>
@@ -106,7 +107,6 @@ export default function CandidatoList() {
     </View>
   );
   
-
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}

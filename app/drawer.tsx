@@ -5,6 +5,7 @@ import CandidatoList from './candidato/list';  // Tela de Listagem
 import CandidatoForm from './candidato/form';  // Tela de Cadastro de Candidatos
 import CadastroUsuario from './usuario/usuarioForm';  // Caminho correto para o arquivo de Cadastro de Usuário
 import PesquisaEleitoralForm from './pesquisaEleitoral/pesquisaForm';
+import LoginScreen from './login/login1';
 
 const Drawer = createDrawerNavigator();
 
@@ -13,7 +14,7 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
   return (
     <DrawerContentScrollView {...props}>
       <View style={styles.header}>
-       
+
         <Text style={styles.appName}>MapeiaVoto</Text>
       </View>
       {/* Renderiza os itens do Drawer */}
@@ -64,6 +65,14 @@ export default function DrawerNavigator() {
         component={PesquisaEleitoralForm}
         options={{
           drawerLabel: 'Pesquisa Eleitoral',
+        }}
+      />
+
+      <Drawer.Screen
+        name="login/login1"
+        component={LoginScreen}
+        options={{
+          drawerLabel: 'Login',
         }}
       />
     </Drawer.Navigator>
