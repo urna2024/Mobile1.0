@@ -4,7 +4,6 @@ import axios from 'axios';
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import { Picker } from '@react-native-picker/picker';
-import Icon from 'react-native-vector-icons/FontAwesome';
 
 interface Candidato {
   id: number;
@@ -83,15 +82,15 @@ export default function CandidatoList() {
 
   const renderCandidato = ({ item }: { item: Candidato }) => (
     <View style={styles.candidatoContainer}>
-      <View style={styles.candidatoInfo}>
-        <TouchableOpacity onPress={() => router.push({ pathname: './form', params: { id: item.id } })}>
+      <TouchableOpacity onPress={() => router.push(`/candidatodetalhes`)}>
+        <View style={styles.candidatoInfo}>
           <Text style={styles.candidatoName}>Nome Completo: {item.nomeCompleto}</Text>
           <Text>Nome Urna: {item.nomeUrna}</Text>
           <Text>UF: {item.uf}</Text>
           <Text>Município: {item.municipio}</Text>
-        </TouchableOpacity>
-      </View>
-
+        </View>
+      </TouchableOpacity>
+  
       <View style={styles.actionContainer}>
         <Text>Status:</Text>
         <Picker
@@ -103,13 +102,10 @@ export default function CandidatoList() {
             <Picker.Item key={status.id} label={status.nome} value={status.id} />
           ))}
         </Picker>
-
-        <TouchableOpacity onPress={() => router.push({ pathname: './form', params: { id: item.id } })}>
-          <Icon name="eye" size={24} color="#007bff" style={styles.icon} />
-        </TouchableOpacity>
       </View>
     </View>
   );
+  
 
   return (
     <KeyboardAvoidingView
@@ -129,7 +125,7 @@ export default function CandidatoList() {
             data={candidatos}
             keyExtractor={(item) => item.id.toString()}
             renderItem={renderCandidato}
-            contentContainerStyle={{ paddingBottom: 100 }} // Ajusta o espaço no final para evitar sobreposição
+            contentContainerStyle={{ paddingBottom: 50 }}
           />
         )}
 
@@ -138,7 +134,6 @@ export default function CandidatoList() {
             style={styles.backButton}
             onPress={() => router.push('/')}
           >
-            <Icon name="arrow-left" size={24} color="#fff" />
             <Text style={styles.backButtonText}>Voltar</Text>
           </TouchableOpacity>
 
@@ -146,7 +141,6 @@ export default function CandidatoList() {
             style={styles.cadastrarButton}
             onPress={() => router.push('./form')}
           >
-            <Icon name="plus" size={24} color="#fff" />
             <Text style={styles.cadastrarButtonText}>Cadastrar Candidato</Text>
           </TouchableOpacity>
         </View>
@@ -202,16 +196,13 @@ const styles = StyleSheet.create({
     height: 40,
     width: '50%',
   },
-  icon: {
-    marginLeft: 10,
-  },
   footer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: '#007bff',
     padding: 15,
-    marginTop: 10, // Remove position absolute e ajusta o layout
+    marginTop: 10,
   },
   backButton: {
     flexDirection: 'row',
