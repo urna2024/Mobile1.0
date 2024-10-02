@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, StyleSheet, ScrollView, ActivityIndicator, Image, TouchableOpacity } from 'react-native';
 import axios from 'axios';
 import { Picker } from '@react-native-picker/picker';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import * as Linking from 'expo-linking'; // Biblioteca para capturar os parâmetros da URL
+import { useRouter } from 'expo-router';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 interface Status {
@@ -32,7 +33,7 @@ interface Municipio {
 }
 
 export default function CandidatoForm() {
-  const { id } = useLocalSearchParams(); 
+  const [id, setId] = useState<string | null>(null); // Armazenar o ID do candidato
   const [nomeCompleto, setNomeCompleto] = useState('');
   const [nomeUrna, setNomeUrna] = useState('');
   const [dataNascimento, setDataNascimento] = useState('');
@@ -49,69 +50,92 @@ export default function CandidatoForm() {
   const [ufOptions, setUfOptions] = useState<UF[]>([]);
   const [municipioOptions, setMunicipioOptions] = useState<Municipio[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const [message, setMessage] = useState<string | null>(null); 
-  const [messageType, setMessageType] = useState<'success' | 'error' | null>(null); 
+  const [message, setMessage] = useState<string | null>(null);
+  const [messageType, setMessageType] = useState<'success' | 'error' | null>(null);
   const router = useRouter();
 
-  
+  // Função para exibir mensagens de sucesso ou erro
   const showMessage = (type: 'success' | 'error', msg: string) => {
     setMessageType(type);
     setMessage(msg);
     setTimeout(() => {
-      setMessage(null); 
-    }, 3000); 
+      setMessage(null);
+    }, 3000);
   };
 
+  // Capturar os parâmetros da URL manualmente
+  useEffect(() => {
+    const url = Linking.parse(window.location.href); // Pega a URL completa
+    const candidatoId = Array.isArray(url.queryParams?.id) ? url.queryParams?.id[0] : url.queryParams?.id || null; // Garantir que seja uma string única
+    setId(candidatoId);
+  }, []);
+  
 
   useEffect(() => {
-    axios.get<Status[]>('http://ggustac-002-site1.htempurl.com/api/Candidato/tipoStatus')
-      .then(response => setStatusOptions(response.data))
-      .catch(error => console.error('Erro ao carregar status:', error));
+    axios
+      .get<Status[]>('http://ggustac-002-site1.htempurl.com/api/Candidato/tipoStatus')
+      .then((response) => setStatusOptions(response.data))
+      .catch((error) => console.error('Erro ao carregar status:', error));
 
-    axios.get<PartidoPolitico[]>('http://ggustac-002-site1.htempurl.com/api/Candidato/tipoPartidoPolitico')
-      .then(response => setPartidoOptions(response.data))
-      .catch(error => console.error('Erro ao carregar partidos:', error));
+    axios
+      .get<PartidoPolitico[]>('http://ggustac-002-site1.htempurl.com/api/Candidato/tipoPartidoPolitico')
+      .then((response) => setPartidoOptions(response.data))
+      .catch((error) => console.error('Erro ao carregar partidos:', error));
 
-    axios.get<CargoDisputado[]>('http://ggustac-002-site1.htempurl.com/api/Candidato/tipoCargoDisputado')
-      .then(response => setCargoOptions(response.data))
-      .catch(error => console.error('Erro ao carregar cargos:', error));
+    axios
+      .get<CargoDisputado[]>('http://ggustac-002-site1.htempurl.com/api/Candidato/tipoCargoDisputado')
+      .then((response) => setCargoOptions(response.data))
+      .catch((error) => console.error('Erro ao carregar cargos:', error));
 
-    axios.get<UF[]>('https://servicodados.ibge.gov.br/api/v1/localidades/estados')
-      .then(response => setUfOptions(response.data))
-      .catch(error => console.error('Erro ao carregar estados:', error));
+    axios
+      .get<UF[]>('https://servicodados.ibge.gov.br/api/v1/localidades/estados')
+      .then((response) => setUfOptions(response.data))
+      .catch((error) => console.error('Erro ao carregar estados:', error));
   }, []);
 
   useEffect(() => {
     if (uf) {
-      axios.get<Municipio[]>(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${uf}/municipios`)
-        .then(response => setMunicipioOptions(response.data))
-        .catch(error => console.error('Erro ao carregar municípios:', error));
+      axios
+        .get<Municipio[]>(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${uf}/municipios`)
+        .then((response) => setMunicipioOptions(response.data))
+        .catch((error) => console.error('Erro ao carregar municípios:', error));
     }
   }, [uf]);
 
   useEffect(() => {
+    console.log('ID do candidato recebido:', id); // Log para verificar o id
+  
     if (id) {
-      setLoading(true);
-      axios.get(`http://ggustac-002-site1.htempurl.com/api/Candidato/${id}/dadosCompletos`)
-        .then(response => {
-          const candidato = response.data;
-          setNomeCompleto(candidato.nomeCompleto);
-          setNomeUrna(candidato.nomeUrna);
-          setDataNascimento(candidato.dataNascimento.split('T')[0]);
-          setUf(candidato.uf);
-          setMunicipio(candidato.municipio);
-          setFoto(candidato.foto);
-          setIdStatus(candidato.idStatus);
-          setIdPartidoPolitico(candidato.idPartidoPolitico);
-          setIdCargoDisputado(candidato.idCargoDisputado);
-          setLoading(false);
+      setLoading(true); // Exibe o loader durante a busca de dados
+      axios
+        .get(`http://ggustac-002-site1.htempurl.com/api/Candidato/${id}/dadosCompletos`)
+        .then((response) => {
+          console.log(`Dados completos do candidato com ID ${id}:`, response.data); // Log para a resposta da API
+  
+          if (response.data) {
+            const candidato = response.data;
+            setNomeCompleto(candidato.nomeCompleto || '');
+            setNomeUrna(candidato.nomeUrna || '');
+            setDataNascimento(candidato.dataNascimento?.split('T')[0] || '');
+            setUf(candidato.uf || '');
+            setMunicipio(candidato.municipio || '');
+            setFoto(candidato.foto || '');
+            setIdStatus(candidato.idStatus || 0);
+            setIdPartidoPolitico(candidato.idPartidoPolitico || 0);
+            setIdCargoDisputado(candidato.idCargoDisputado || 0);
+          } else {
+            showMessage('error', 'Candidato não encontrado.');
+          }
+          setLoading(false); // Define como 'não carregando' após a busca
         })
-        .catch(error => {
+        .catch((error) => {
+          console.error('Erro ao buscar os detalhes do candidato:', error); // Log para erros
           setLoading(false);
           showMessage('error', 'Erro ao buscar detalhes do candidato.');
         });
     }
-  }, [id]);
+  }, [id]); // Assegure-se de que o efeito depende de "id"
+  
 
   const handleDateChange = (text: string) => {
     const cleaned = text.replace(/[^0-9]/g, '');
@@ -155,7 +179,7 @@ export default function CandidatoForm() {
     const formattedDate = formatDateForApi(dataNascimento);
 
     const candidato = {
-      id: id ? parseInt(id as string, 10) : 0,
+      id: id ? parseInt(id, 10) : 0,
       nomeCompleto,
       nomeUrna,
       dataNascimento: formattedDate,
@@ -168,23 +192,25 @@ export default function CandidatoForm() {
     };
 
     if (id) {
-      axios.put(`http://ggustac-002-site1.htempurl.com/api/Candidato/${id}`, candidato)
+      axios
+        .put(`http://ggustac-002-site1.htempurl.com/api/Candidato/${id}`, candidato)
         .then(() => {
           showMessage('success', 'Candidato atualizado com sucesso!');
           clearFields();
           router.push('/candidato/list');
         })
-        .catch(error => {
+        .catch((error) => {
           showMessage('error', 'Erro ao atualizar candidato.');
         });
     } else {
-      axios.post('http://ggustac-002-site1.htempurl.com/api/Candidato', candidato)
+      axios
+        .post('http://ggustac-002-site1.htempurl.com/api/Candidato', candidato)
         .then(() => {
           showMessage('success', 'Candidato cadastrado com sucesso!');
           clearFields();
           router.push('/candidato/list');
         })
-        .catch(error => {
+        .catch((error) => {
           showMessage('error', 'Erro ao cadastrar candidato.');
         });
     }
