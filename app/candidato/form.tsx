@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, StyleSheet, ScrollView, ActivityIndicator, Image, TouchableOpacity } from 'react-native';
 import axios from 'axios';
 import { Picker } from '@react-native-picker/picker';
-import * as Linking from 'expo-linking'; // Biblioteca para capturar os parâmetros da URL
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 interface Status {
@@ -33,7 +32,8 @@ interface Municipio {
 }
 
 export default function CandidatoForm() {
-  const [id, setId] = useState<string | null>(null); // Armazenar o ID do candidato
+  const params = useLocalSearchParams(); // Pegamos os parâmetros da URL
+  const id = Array.isArray(params.id) ? params.id[0] : params.id; // Garantir que seja uma string única
   const [nomeCompleto, setNomeCompleto] = useState('');
   const [nomeUrna, setNomeUrna] = useState('');
   const [dataNascimento, setDataNascimento] = useState('');
@@ -54,7 +54,6 @@ export default function CandidatoForm() {
   const [messageType, setMessageType] = useState<'success' | 'error' | null>(null);
   const router = useRouter();
 
-  // Função para exibir mensagens de sucesso ou erro
   const showMessage = (type: 'success' | 'error', msg: string) => {
     setMessageType(type);
     setMessage(msg);
@@ -62,14 +61,6 @@ export default function CandidatoForm() {
       setMessage(null);
     }, 3000);
   };
-
-  // Capturar os parâmetros da URL manualmente
-  useEffect(() => {
-    const url = Linking.parse(window.location.href); // Pega a URL completa
-    const candidatoId = Array.isArray(url.queryParams?.id) ? url.queryParams?.id[0] : url.queryParams?.id || null; // Garantir que seja uma string única
-    setId(candidatoId);
-  }, []);
-  
 
   useEffect(() => {
     axios
@@ -103,15 +94,14 @@ export default function CandidatoForm() {
   }, [uf]);
 
   useEffect(() => {
-    console.log('ID do candidato recebido:', id); // Log para verificar o id
-  
+    console.log('ID do candidato recebido:', id);
+
     if (id) {
-      setLoading(true); // Exibe o loader durante a busca de dados
+      setLoading(true);
       axios
         .get(`http://ggustac-002-site1.htempurl.com/api/Candidato/${id}/dadosCompletos`)
         .then((response) => {
-          console.log(`Dados completos do candidato com ID ${id}:`, response.data); // Log para a resposta da API
-  
+          console.log(`Dados completos do candidato com ID ${id}:`, response.data);
           if (response.data) {
             const candidato = response.data;
             setNomeCompleto(candidato.nomeCompleto || '');
@@ -126,16 +116,15 @@ export default function CandidatoForm() {
           } else {
             showMessage('error', 'Candidato não encontrado.');
           }
-          setLoading(false); // Define como 'não carregando' após a busca
+          setLoading(false);
         })
         .catch((error) => {
-          console.error('Erro ao buscar os detalhes do candidato:', error); // Log para erros
+          console.error('Erro ao buscar os detalhes do candidato:', error);
           setLoading(false);
           showMessage('error', 'Erro ao buscar detalhes do candidato.');
         });
     }
-  }, [id]); // Assegure-se de que o efeito depende de "id"
-  
+  }, [id]);
 
   const handleDateChange = (text: string) => {
     const cleaned = text.replace(/[^0-9]/g, '');
@@ -397,7 +386,7 @@ const styles = StyleSheet.create({
   backButtonText: {
     color: '#007bff',
     fontSize: 16,
-    marginLeft: 10, // Espaço entre o ícone e o texto
+    marginLeft: 10,
   },
   messageBox: {
     padding: 10,
