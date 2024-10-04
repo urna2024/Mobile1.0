@@ -85,7 +85,7 @@ export default function CandidatoList() {
       {/* Passe o ID do candidato corretamente como parâmetro */}
       <TouchableOpacity onPress={() => {
         console.log(`Navigating to /candidato/form?id=${item.id}`); // Log para inspecionar a navegação
-        router.push(`/candidato/form?id=${item.id}`);
+        router.push( `/candidato/form?id=${item.id}`);
       }}>
         <View style={styles.candidatoInfo}>
           <Text style={styles.candidatoName}>Nome Completo: {item.nomeCompleto}</Text>

@@ -33,6 +33,7 @@ interface Municipio {
 
 export default function CandidatoForm() {
   const params = useLocalSearchParams(); // Pegamos os parâmetros da URL
+  console.log(params.id);
   const id = Array.isArray(params.id) ? params.id[0] : params.id; // Garantir que seja uma string única
   const [nomeCompleto, setNomeCompleto] = useState('');
   const [nomeUrna, setNomeUrna] = useState('');
