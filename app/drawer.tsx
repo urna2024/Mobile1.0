@@ -6,6 +6,7 @@ import CandidatoForm from './candidato/form';  // Tela de Cadastro de Candidatos
 import CadastroUsuario from './usuario/usuarioForm';  // Caminho correto para o arquivo de Cadastro de Usuário
 import PesquisaEleitoralForm from './pesquisaEleitoral/pesquisaForm';
 import LoginScreen from './login/login1';
+import UsuarioList from './usuario/usuarioList';
 
 const Drawer = createDrawerNavigator();
 
@@ -57,6 +58,13 @@ export default function DrawerNavigator() {
         component={CadastroUsuario}
         options={{
           drawerLabel: 'Cadastrar Usuário',
+        }}
+      />
+      <Drawer.Screen
+        name="usuario/usuarioList"
+        component={UsuarioList}
+        options={{
+          drawerLabel: 'Listar Usuário',
         }}
       />
 
