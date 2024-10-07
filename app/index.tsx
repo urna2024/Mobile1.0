@@ -3,7 +3,7 @@ import { Redirect } from 'expo-router';
 
 export default function Index() {
   
-  return <Redirect href="/candidato/list" />;
+  return <Redirect href="/login/login1" />;
 }
 
 

@@ -1,16 +1,15 @@
 import React from 'react';
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList, DrawerContentComponentProps } from '@react-navigation/drawer';
 import { View, Text, Image, StyleSheet } from 'react-native';
-import CandidatoList from './candidato/list';  // Tela de Listagem
-import CandidatoForm from './candidato/form';  // Tela de Cadastro de Candidatos
-import CadastroUsuario from './usuario/usuarioForm';  // Caminho correto para o arquivo de Cadastro de Usuário
+import CandidatoList from './candidato/list';
+import CandidatoForm from './candidato/form';
+import CadastroUsuario from './usuario/usuarioForm';
 import PesquisaEleitoralForm from './pesquisaEleitoral/pesquisaForm';
 import LoginScreen from './login/login1';
 import UsuarioList from './usuario/usuarioList';
 
 const Drawer = createDrawerNavigator();
 
-// Função para renderizar o conteúdo do Drawer, incluindo a logo e o nome "MapeiaVoto"
 function CustomDrawerContent(props: DrawerContentComponentProps) {
   return (
     <DrawerContentScrollView {...props}>
@@ -27,7 +26,7 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
 export default function DrawerNavigator() {
   return (
     <Drawer.Navigator
-      initialRouteName="candidato/list"
+      initialRouteName="login/login1"
       drawerContent={(props) => <CustomDrawerContent {...props} />}
       screenOptions={{
         drawerStyle: {
