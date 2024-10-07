@@ -5,15 +5,14 @@ import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import { Picker } from '@react-native-picker/picker';
 
-interface Candidato {
+interface Usuario {
   id: number;
-  nomeCompleto: string;
-  nomeUrna: string;
-  uf: string;
-  municipio: string;
-  dataNascimento: string;
+  nomeUsuario: string;
+  email: string;
   idStatus: number;
   statusNome: string;
+  idPerfilUsuario: number;
+  perfilNome: string;
 }
 
 interface Status {
@@ -21,20 +20,20 @@ interface Status {
   nome: string;
 }
 
-export default function CandidatoList() {
-  const [candidatos, setCandidatos] = useState<Candidato[]>([]);
+export default function UsuarioList() {
+  const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [statusOptions, setStatusOptions] = useState<Status[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const router = useRouter();
 
-  const fetchCandidatos = async () => {
+  const fetchUsuarios = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://ggustac-002-site1.htempurl.com/api/Candidato/dadosBasicos');
-      setCandidatos(response.data);
+      const response = await axios.get('http://ggustac-002-site1.htempurl.com/api/Usuario/dadosBasicos');
+      setUsuarios(response.data);
       setLoading(false);
     } catch (error) {
-      console.error('Erro ao buscar candidatos:', error);
+      console.error('Erro ao buscar usuários:', error);
       setLoading(false);
     }
   };
@@ -50,21 +49,21 @@ export default function CandidatoList() {
 
   useFocusEffect(
     useCallback(() => {
-      fetchCandidatos();
+      fetchUsuarios();
       fetchStatusOptions();
     }, [])
   );
 
   const alterarStatus = async (id: number, newStatusId: number) => {
-    const candidatoAtual = candidatos.find((candidato) => candidato.id === id);
+    const usuarioAtual = usuarios.find((usuario) => usuario.id === id);
 
-    if (!candidatoAtual || candidatoAtual.idStatus === newStatusId) {
+    if (!usuarioAtual || usuarioAtual.idStatus === newStatusId) {
       return;
     }
 
     try {
       await axios.patch(
-        `http://ggustac-002-site1.htempurl.com/api/Candidato/${id}/mudarStatus`,
+        `http://ggustac-002-site1.htempurl.com/api/Usuario/${id}/mudarStatus`,
         JSON.stringify(newStatusId),
         {
           headers: {
@@ -72,25 +71,24 @@ export default function CandidatoList() {
           },
         }
       );
-      Alert.alert('Sucesso', 'Status do candidato alterado com sucesso!');
-      fetchCandidatos();
+      Alert.alert('Sucesso', 'Status do usuário alterado com sucesso!');
+      fetchUsuarios();
     } catch (error) {
-      console.error('Erro ao alterar status do candidato:', error);
-      Alert.alert('Erro', 'Ocorreu um erro ao alterar o status do candidato.');
+      console.error('Erro ao alterar status do usuário:', error);
+      Alert.alert('Erro', 'Ocorreu um erro ao alterar o status do usuário.');
     }
   };
 
-  const renderCandidato = ({ item }: { item: Candidato }) => (
-    <View style={styles.candidatoContainer}>
+  const renderUsuario = ({ item }: { item: Usuario }) => (
+    <View style={styles.usuarioContainer}>
       <TouchableOpacity onPress={() => {
-        console.log(`Navigating to /candidato/form?id=${item.id}`);
-        router.push(`/candidato/form?id=${item.id}`);
+        console.log(`Navigating to /usuario/form?id=${item.id}`);
+        router.push(`/usuario/usuarioForm?id=${item.id}`);
       }}>
-        <View style={styles.candidatoInfo}>
-          <Text style={styles.candidatoName}>Nome Completo: {item.nomeCompleto}</Text>
-          <Text>Nome Urna: {item.nomeUrna}</Text>
-          <Text>UF: {item.uf}</Text>
-          <Text>Município: {item.municipio}</Text>
+        <View style={styles.usuarioInfo}>
+          <Text style={styles.usuarioName}>Nome de Usuário: {item.nomeUsuario}</Text>
+          <Text>Email: {item.email}</Text>
+          <Text>Perfil: {item.perfilNome}</Text>
         </View>
       </TouchableOpacity>
 
@@ -117,16 +115,16 @@ export default function CandidatoList() {
       <View style={styles.container}>
         <View style={styles.header}>
           <Image source={require('../../assets/images/logo.jpeg')} style={styles.logo} />
-          <Text style={styles.title}>Lista de Candidatos</Text>
+          <Text style={styles.title}>Lista de Usuários</Text>
         </View>
 
         {loading ? (
           <ActivityIndicator size="large" color="#0000ff" />
         ) : (
           <FlatList
-            data={candidatos}
+            data={usuarios}
             keyExtractor={(item) => item.id.toString()}
-            renderItem={renderCandidato}
+            renderItem={renderUsuario}
             contentContainerStyle={{ paddingBottom: 50 }}
           />
         )}
@@ -143,7 +141,7 @@ export default function CandidatoList() {
             style={styles.cadastrarButton}
             onPress={() => router.push('./form')}
           >
-            <Text style={styles.cadastrarButtonText}>Cadastrar Candidato</Text>
+            <Text style={styles.cadastrarButtonText}>Cadastrar Usuário</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -173,7 +171,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
   },
-  candidatoContainer: {
+  usuarioContainer: {
     marginBottom: 15,
     padding: 10,
     backgroundColor: '#fff',
@@ -181,10 +179,10 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     borderWidth: 1,
   },
-  candidatoInfo: {
+  usuarioInfo: {
     marginBottom: 10,
   },
-  candidatoName: {
+  usuarioName: {
     fontSize: 18,
     fontWeight: 'bold',
   },

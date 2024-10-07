@@ -32,9 +32,9 @@ interface Municipio {
 }
 
 export default function CandidatoForm() {
-  const params = useLocalSearchParams(); // Pegamos os parâmetros da URL
-  console.log(params.id);
-  const id = Array.isArray(params.id) ? params.id[0] : params.id; // Garantir que seja uma string única
+  const params = useLocalSearchParams(); 
+  const id = params?.id ? String(params.id) : null; 
+
   const [nomeCompleto, setNomeCompleto] = useState('');
   const [nomeUrna, setNomeUrna] = useState('');
   const [dataNascimento, setDataNascimento] = useState('');
@@ -95,7 +95,7 @@ export default function CandidatoForm() {
   }, [uf]);
 
   useEffect(() => {
-    console.log('ID do candidato recebido:', id);
+    console.log('ID do candidato recebido:', id); 
 
     if (id) {
       setLoading(true);
@@ -141,6 +141,9 @@ export default function CandidatoForm() {
 
   const formatDateForApi = (dateString: string) => {
     const [day, month, year] = dateString.split('/');
+    if (!day || !month || !year) {
+      return '';
+    }
     return `${year}-${month}-${day}T00:00:00.000Z`;
   };
 
@@ -166,6 +169,11 @@ export default function CandidatoForm() {
   };
 
   const handleSave = () => {
+    if (!dataNascimento || !dataNascimento.includes('/')) {
+      showMessage('error', 'A data de nascimento está no formato inválido.');
+      return;
+    }
+
     const formattedDate = formatDateForApi(dataNascimento);
 
     const candidato = {
@@ -190,6 +198,7 @@ export default function CandidatoForm() {
           router.push('/candidato/list');
         })
         .catch((error) => {
+          console.error('Erro ao atualizar candidato:', error);
           showMessage('error', 'Erro ao atualizar candidato.');
         });
     } else {
@@ -201,6 +210,7 @@ export default function CandidatoForm() {
           router.push('/candidato/list');
         })
         .catch((error) => {
+          console.error('Erro ao cadastrar candidato:', error);
           showMessage('error', 'Erro ao cadastrar candidato.');
         });
     }
