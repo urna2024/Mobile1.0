@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity } from 'react-native';
 import axios from 'axios';
 import { Picker } from '@react-native-picker/picker';
 import FlashMessage, { showMessage } from 'react-native-flash-message';
+import { useRouter } from 'expo-router';
 
 interface Status {
   id: number;
@@ -25,6 +26,7 @@ export default function CadastroUsuario() {
   const [perfilOptions, setPerfilOptions] = useState<PerfilUsuario[]>([]);
   const [loading, setLoading] = useState(true);
   const [cadastrando, setCadastrando] = useState(false);
+  const router = useRouter(); // Para navegação
 
   const fetchOptions = async () => {
     try {
@@ -61,8 +63,7 @@ export default function CadastroUsuario() {
     };
 
     try {
-      const response = await axios.post('http://ggustac-002-site1.htempurl.com/api/Usuario', dadosUsuario);
-
+      await axios.post('http://ggustac-002-site1.htempurl.com/api/Usuario', dadosUsuario);
 
       showMessage({
         message: 'Sucesso',
@@ -71,7 +72,6 @@ export default function CadastroUsuario() {
         icon: 'success',
         duration: 3000,
       });
-
 
       setNomeUsuario('');
       setEmail('');
@@ -151,12 +151,15 @@ export default function CadastroUsuario() {
         ))}
       </Picker>
 
-      <Button
-        title={cadastrando ? "Cadastrando..." : "Cadastrar Usuário"}
-        onPress={handleCadastro}
-        disabled={cadastrando}
-      />
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity style={styles.button} onPress={handleCadastro} disabled={cadastrando}>
+          <Text style={styles.buttonText}>{cadastrando ? "Cadastrando..." : "Cadastrar Usuário"}</Text>
+        </TouchableOpacity>
 
+        <TouchableOpacity style={styles.backButton} onPress={() => router.push('/usuario/usuarioList')}>
+          <Text style={styles.backButtonText}>Voltar</Text>
+        </TouchableOpacity>
+      </View>
 
       <FlashMessage position="top" />
     </ScrollView>
@@ -186,5 +189,40 @@ const styles = StyleSheet.create({
   picker: {
     height: 50,
     marginBottom: 10,
+  },
+  buttonContainer: {
+    marginTop: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  button: {
+    backgroundColor: '#1a2b52', // Cor azul escuro
+    padding: 10,
+    borderRadius: 8, // Bordas arredondadas
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center', // Centraliza o texto verticalmente
+    marginHorizontal: 5,
+  },
+  buttonText: {
+    color: '#fff', // Texto branco
+    fontWeight: 'bold',
+    fontSize: 16, // Tamanho de fonte ajustado
+    textAlign: 'center', // Centraliza o texto horizontalmente
+  },
+  backButton: {
+    backgroundColor: '#1a2b52', // Cor azul escuro igual ao botão "Cadastrar Usuário"
+    padding: 10,
+    borderRadius: 8, // Bordas arredondadas
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center', // Centraliza o texto verticalmente
+    marginHorizontal: 5,
+  },
+  backButtonText: {
+    color: '#fff', // Texto branco
+    fontWeight: 'bold',
+    fontSize: 16, // Tamanho de fonte ajustado
+    textAlign: 'center', // Centraliza o texto horizontalmente
   },
 });

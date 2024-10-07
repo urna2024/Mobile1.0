@@ -83,7 +83,6 @@ export default function CandidatoList() {
   const renderCandidato = ({ item }: { item: Candidato }) => (
     <View style={styles.candidatoContainer}>
       <TouchableOpacity onPress={() => {
-        console.log(`Navigating to /candidato/form?id=${item.id}`);
         router.push(`/candidato/form?id=${item.id}`);
       }}>
         <View style={styles.candidatoInfo}>
@@ -131,19 +130,19 @@ export default function CandidatoList() {
           />
         )}
 
-        <View style={styles.footer}>
+        <View style={styles.buttonContainer}>
           <TouchableOpacity
-            style={styles.backButton}
+            style={[styles.button, styles.backButton]}
             onPress={() => router.push('/')}
           >
-            <Text style={styles.backButtonText}>Voltar</Text>
+            <Text style={styles.buttonText}>Voltar</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={styles.cadastrarButton}
+            style={styles.button}
             onPress={() => router.push('./form')}
           >
-            <Text style={styles.cadastrarButtonText}>Cadastrar Candidato</Text>
+            <Text style={styles.buttonText}>Cadastrar Candidato</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -158,20 +157,18 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
   },
   header: {
-    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
     marginBottom: 20,
   },
   logo: {
     width: 50,
     height: 50,
-    marginRight: 10,
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     textAlign: 'center',
+    marginTop: 10,
   },
   candidatoContainer: {
     marginBottom: 15,
@@ -198,34 +195,26 @@ const styles = StyleSheet.create({
     height: 40,
     width: '50%',
   },
-  footer: {
+  buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    marginTop: 20,
+  },
+  button: {
     backgroundColor: '#007bff',
     padding: 15,
-    marginTop: 10,
+    borderRadius: 8,
+    flex: 1,
+    alignItems: 'center',
+    marginHorizontal: 5,
   },
   backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    backgroundColor: '#6c757d',
   },
-  backButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    marginLeft: 10,
-  },
-  cadastrarButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#007bff',
-    padding: 10,
-    borderRadius: 5,
-  },
-  cadastrarButtonText: {
+  buttonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
-    marginLeft: 10,
+     textAlign: 'center'
   },
 });

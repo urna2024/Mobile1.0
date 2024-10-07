@@ -3,7 +3,7 @@ import { View, Text, TextInput, StyleSheet, ScrollView, ActivityIndicator, Image
 import axios from 'axios';
 import { Picker } from '@react-native-picker/picker';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import { Ionicons } from '@expo/vector-icons'; // Para adicionar ícones de sucesso/erro
 
 interface Status {
   id: number;
@@ -60,7 +60,7 @@ export default function CandidatoForm() {
     setMessage(msg);
     setTimeout(() => {
       setMessage(null);
-    }, 3000);
+    }, 4000); // Mantém a mensagem por 4 segundos
   };
 
   useEffect(() => {
@@ -168,9 +168,58 @@ export default function CandidatoForm() {
     setIdCargoDisputado(0);
   };
 
-  const handleSave = () => {
+  const validateFields = () => {
+    if (!nomeCompleto) {
+      showMessage('error', 'Nome completo é obrigatório.');
+      return false;
+    }
+
+    if (!nomeUrna) {
+      showMessage('error', 'Nome na urna é obrigatório.');
+      return false;
+    }
+
     if (!dataNascimento || !dataNascimento.includes('/')) {
-      showMessage('error', 'A data de nascimento está no formato inválido.');
+      showMessage('error', 'A data de nascimento está no formato inválido. Use o formato DD/MM/YYYY.');
+      return false;
+    }
+
+    if (!uf) {
+      showMessage('error', 'Selecione o estado (UF).');
+      return false;
+    }
+
+    if (!municipio) {
+      showMessage('error', 'Selecione o município.');
+      return false;
+    }
+
+    if (foto && !isValidUrl(foto)) {
+      showMessage('error', 'A URL da foto é inválida.');
+      return false;
+    }
+
+    if (!idStatus || idStatus === 0) {
+      showMessage('error', 'Selecione um status.');
+      return false;
+    }
+
+    if (!idPartidoPolitico || idPartidoPolitico === 0) {
+      showMessage('error', 'Selecione um partido político.');
+      return false;
+    }
+
+    if (!idCargoDisputado || idCargoDisputado === 0) {
+      showMessage('error', 'Selecione um cargo disputado.');
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleSave = () => {
+    // Valida os campos antes de tentar salvar
+    if (!validateFields()) {
       return;
     }
 
@@ -198,7 +247,7 @@ export default function CandidatoForm() {
           router.push('/candidato/list');
         })
         .catch((error) => {
-          console.error('Erro ao atualizar candidato:', error);
+          console.error('Erro ao atualizar candidato:', error.response ? error.response.data : error); // Captura o erro
           showMessage('error', 'Erro ao atualizar candidato.');
         });
     } else {
@@ -210,7 +259,7 @@ export default function CandidatoForm() {
           router.push('/candidato/list');
         })
         .catch((error) => {
-          console.error('Erro ao cadastrar candidato:', error);
+          console.error('Erro ao cadastrar candidato:', error.response ? error.response.data : error); // Captura o erro
           showMessage('error', 'Erro ao cadastrar candidato.');
         });
     }
@@ -226,6 +275,12 @@ export default function CandidatoForm() {
 
       {message && (
         <View style={[styles.messageBox, messageType === 'success' ? styles.successBox : styles.errorBox]}>
+          <Ionicons 
+            name={messageType === 'success' ? 'checkmark-circle' : 'close-circle'} 
+            size={24} 
+            color={messageType === 'success' ? '#155724' : '#721c24'} 
+            style={styles.messageIcon}
+          />
           <Text style={styles.messageText}>{message}</Text>
         </View>
       )}
@@ -334,7 +389,6 @@ export default function CandidatoForm() {
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.backButton} onPress={() => router.push('/candidato/list')}>
-          <Icon name="arrow-left" size={24} color="#007bff" />
           <Text style={styles.backButtonText}>Voltar</Text>
         </TouchableOpacity>
       </View>
@@ -375,33 +429,40 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   button: {
-    backgroundColor: '#007bff',
-    padding: 15,
-    borderRadius: 5,
+    backgroundColor: '#1a2b52', // Cor azul escuro
+    padding: 10,
+    borderRadius: 8, // Bordas arredondadas
     flex: 1,
     alignItems: 'center',
+    justifyContent: 'center', // Centraliza o texto verticalmente
     marginHorizontal: 5,
   },
   buttonText: {
-    color: '#fff',
+    color: '#fff', // Texto branco
     fontWeight: 'bold',
+    fontSize: 16, // Tamanho de fonte ajustado
+    textAlign: 'center', // Centraliza o texto horizontalmente
   },
   backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 20,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#1a2b52', // Cor azul escuro igual ao botão "Salvar"
     padding: 10,
-    borderRadius: 5,
+    borderRadius: 8, // Bordas arredondadas
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center', // Centraliza o texto verticalmente
+    marginHorizontal: 5,
   },
   backButtonText: {
-    color: '#007bff',
-    fontSize: 16,
-    marginLeft: 10,
+    color: '#fff', // Texto branco
+    fontWeight: 'bold',
+    fontSize: 16, // Tamanho de fonte ajustado
+    textAlign: 'center', // Centraliza o texto horizontalmente
   },
   messageBox: {
     padding: 10,
     borderRadius: 5,
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 15,
   },
   successBox: {
@@ -416,5 +477,9 @@ const styles = StyleSheet.create({
     color: '#155724',
     fontSize: 16,
     textAlign: 'center',
+    flex: 1,
+  },
+  messageIcon: {
+    marginRight: 10,
   },
 });
