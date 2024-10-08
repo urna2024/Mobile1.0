@@ -136,6 +136,7 @@ export default function CandidatoList() {
           />
         )}
 
+
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             style={[styles.button, styles.backButton]}
