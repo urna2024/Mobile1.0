@@ -77,7 +77,7 @@ export default function CandidatoForm() {
       .catch((error) => console.error('Erro ao carregar estados:', error));
   }, []);
 
-  // Carregar municípios ao selecionar UF
+  
   useEffect(() => {
     if (uf) {
       axios
@@ -97,7 +97,7 @@ export default function CandidatoForm() {
           const candidato = response.data;
           setNomeCompleto(candidato.nomeCompleto || '');
           setNomeUrna(candidato.nomeUrna || '');
-          setDataNascimento(candidato.dataNascimento?.split('T')[0] || ''); // Ajustar formato da data
+          setDataNascimento(candidato.dataNascimento?.split('T')[0] || '');
           setUf(candidato.uf || '');
           setMunicipio(candidato.municipio || '');
           setFoto(candidato.foto || '');

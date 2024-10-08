@@ -49,12 +49,12 @@ export default function LoginScreen() {
 
     return (
         <ImageBackground
-            source={require('../../assets/images/fundo.jpg')} // Background mais leve e agradável
+            source={require('../../assets/images/fundo.jpg')} 
             style={styles.background}
         >
             <View style={styles.overlay}>
                 <Image
-                    source={require('../../assets/images/urna.png')} // Logo da aplicação
+                    source={require('../../assets/images/urna.png')} 
                     style={styles.logo}
                 />
                 
@@ -102,35 +102,35 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        resizeMode: 'cover', // Background cobre a tela toda
+        resizeMode: 'cover', 
     },
     overlay: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
         padding: 20,
-        backgroundColor: 'rgba(0, 0, 0, 0.6)', // Overlay escura para contraste
+        backgroundColor: 'rgba(0, 0, 0, 0.6)', 
         width: '100%',
     },
     logo: {
         width: 180,
         height: 180,
         marginBottom: 30,
-        resizeMode: 'contain', // Logo cobre o espaço horizontal do overlay
+        resizeMode: 'contain', 
     },
     systemTitle: {
         fontSize: 24,
         fontWeight: 'bold',
         color: '#fff',
-        fontFamily: 'Cabin_700Bold', // Usando a fonte Cabin
-        marginBottom: 10, // Adiciona um pequeno espaço abaixo do título do sistema
+        fontFamily: 'Cabin_700Bold',
+        marginBottom: 10, 
     },
     title: {
         fontSize: 28,
         fontWeight: 'bold',
         color: '#fff',
         marginBottom: 20,
-        fontFamily: 'Cabin_700Bold', // Fonte Cabin Bold
+        fontFamily: 'Cabin_700Bold', 
     },
     label: {
         alignSelf: 'flex-start',
@@ -139,12 +139,12 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: '#fff',
         marginBottom: 5,
-        fontFamily: 'Cabin_400Regular', // Fonte Cabin Regular
+        fontFamily: 'Cabin_400Regular', 
     },
     input: {
         width: '90%',
         height: 50,
-        backgroundColor: 'rgba(255, 255, 255, 0.9)', // Transparência suave nos inputs
+        backgroundColor: 'rgba(255, 255, 255, 0.9)', 
         borderRadius: 8,
         marginBottom: 15,
         paddingHorizontal: 15,
@@ -153,7 +153,7 @@ const styles = StyleSheet.create({
         shadowColor: '#000',
         shadowOpacity: 0.1,
         shadowRadius: 5,
-        fontFamily: 'Cabin_400Regular', // Fonte Cabin Regular
+        fontFamily: 'Cabin_400Regular',
     },
     button: {
         width: '90%',
@@ -164,12 +164,12 @@ const styles = StyleSheet.create({
         shadowColor: '#000',
         shadowOpacity: 0.2,
         shadowRadius: 5,
-        elevation: 5, // Elevação para criar sombra
+        elevation: 5,
     },
     buttonText: {
         color: '#fff',
         fontSize: 18,
         fontWeight: 'bold',
-        fontFamily: 'Cabin_700Bold', // Fonte Cabin Bold
+        fontFamily: 'Cabin_700Bold',
     },
 });

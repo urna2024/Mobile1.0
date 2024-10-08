@@ -196,33 +196,33 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   button: {
-    backgroundColor: '#1a2b52', // Cor azul escuro
+    backgroundColor: '#1a2b52', 
     padding: 10,
-    borderRadius: 8, // Bordas arredondadas
+    borderRadius: 8, 
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center', // Centraliza o texto verticalmente
+    justifyContent: 'center', 
     marginHorizontal: 5,
   },
   buttonText: {
-    color: '#fff', // Texto branco
+    color: '#fff', 
     fontWeight: 'bold',
-    fontSize: 16, // Tamanho de fonte ajustado
-    textAlign: 'center', // Centraliza o texto horizontalmente
+    fontSize: 16, 
+    textAlign: 'center', 
   },
   backButton: {
-    backgroundColor: '#1a2b52', // Cor azul escuro igual ao botão "Cadastrar Usuário"
+    backgroundColor: '#1a2b52', 
     padding: 10,
-    borderRadius: 8, // Bordas arredondadas
+    borderRadius: 8, 
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center', // Centraliza o texto verticalmente
+    justifyContent: 'center', 
     marginHorizontal: 5,
   },
   backButtonText: {
-    color: '#fff', // Texto branco
+    color: '#fff', 
     fontWeight: 'bold',
-    fontSize: 16, // Tamanho de fonte ajustado
-    textAlign: 'center', // Centraliza o texto horizontalmente
+    fontSize: 16, 
+    textAlign: 'center', 
   },
 });
