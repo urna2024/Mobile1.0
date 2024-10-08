@@ -1,9 +1,8 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Alert, Image, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Image, KeyboardAvoidingView, Platform } from 'react-native';
 import axios from 'axios';
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
-import { Picker } from '@react-native-picker/picker';
 
 interface Candidato {
   id: number;
@@ -11,19 +10,10 @@ interface Candidato {
   nomeUrna: string;
   uf: string;
   municipio: string;
-  dataNascimento: string;
-  idStatus: number;
-  statusNome: string;
-}
-
-interface Status {
-  id: number;
-  nome: string;
 }
 
 export default function CandidatoList() {
   const [candidatos, setCandidatos] = useState<Candidato[]>([]);
-  const [statusOptions, setStatusOptions] = useState<Status[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const router = useRouter();
 
@@ -39,50 +29,16 @@ export default function CandidatoList() {
     }
   };
 
-  const fetchStatusOptions = async () => {
-    try {
-      const response = await axios.get('http://ggustac-002-site1.htempurl.com/api/Candidato/tipoStatus');
-      setStatusOptions(response.data);
-    } catch (error) {
-      console.error('Erro ao buscar status:', error);
-    }
-  };
-
   useFocusEffect(
     useCallback(() => {
       fetchCandidatos();
-      fetchStatusOptions();
     }, [])
   );
-
-  const alterarStatus = async (id: number, newStatusId: number) => {
-    const candidatoAtual = candidatos.find((candidato) => candidato.id === id);
-
-    if (!candidatoAtual || candidatoAtual.idStatus === newStatusId) {
-      return;
-    }
-
-    try {
-      await axios.patch(
-        `http://ggustac-002-site1.htempurl.com/api/Candidato/${id}/mudarStatus`,
-        JSON.stringify(newStatusId),
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-      Alert.alert('Sucesso', 'Status do candidato alterado com sucesso!');
-      fetchCandidatos();
-    } catch (error) {
-      console.error('Erro ao alterar status do candidato:', error);
-      Alert.alert('Erro', 'Ocorreu um erro ao alterar o status do candidato.');
-    }
-  };
 
   const renderCandidato = ({ item }: { item: Candidato }) => (
     <View style={styles.candidatoContainer}>
       <TouchableOpacity onPress={() => {
+        // Navegando para a página do formulário com o ID do candidato
         router.push(`/candidato/form?id=${item.id}`);
       }}>
         <View style={styles.candidatoInfo}>
@@ -90,30 +46,12 @@ export default function CandidatoList() {
           <Text>Nome Urna: {item.nomeUrna}</Text>
           <Text>UF: {item.uf}</Text>
           <Text>Município: {item.municipio}</Text>
+          
         </View>
       </TouchableOpacity>
-
-      <View style={styles.actionContainer}>
-        <Text>Status:</Text>
-        <Picker
-          selectedValue={item.idStatus}
-          onValueChange={(value) => alterarStatus(item.id, value)}
-          style={styles.picker}
-        >
-          {statusOptions.map((status) => (
-            <Picker.Item key={status.id} label={status.nome} value={status.id} />
-          ))}
-        </Picker>
-      </View>
     </View>
   );
 
-  function navigateToDetalhe(id: number) {
-    router.push({
-      pathname: '/candidato/form',
-      params: { id },
-    });
-  }
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
@@ -135,7 +73,6 @@ export default function CandidatoList() {
             contentContainerStyle={{ paddingBottom: 50 }}
           />
         )}
-
 
         <View style={styles.buttonContainer}>
           <TouchableOpacity
@@ -192,16 +129,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
-  actionContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: 10,
-  },
-  picker: {
-    height: 40,
-    width: '50%',
-  },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -223,7 +150,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
-     textAlign: 'center',
-     justifyContent: 'center',
+    textAlign: 'center',
+    justifyContent: 'center',
   },
 });

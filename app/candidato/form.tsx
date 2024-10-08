@@ -3,7 +3,8 @@ import { View, Text, TextInput, StyleSheet, ScrollView, ActivityIndicator, Image
 import axios from 'axios';
 import { Picker } from '@react-native-picker/picker';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons'; // Para adicionar ícones de sucesso/erro
+import { Ionicons } from '@expo/vector-icons';
+import { showMessage } from 'react-native-flash-message';
 
 interface Status {
   id: number;
@@ -51,18 +52,9 @@ export default function CandidatoForm() {
   const [ufOptions, setUfOptions] = useState<UF[]>([]);
   const [municipioOptions, setMunicipioOptions] = useState<Municipio[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const [message, setMessage] = useState<string | null>(null);
-  const [messageType, setMessageType] = useState<'success' | 'error' | null>(null);
   const router = useRouter();
 
-  const showMessage = (type: 'success' | 'error', msg: string) => {
-    setMessageType(type);
-    setMessage(msg);
-    setTimeout(() => {
-      setMessage(null);
-    }, 4000); // Mantém a mensagem por 4 segundos
-  };
-
+  // Carregar opções de status, partidos e cargos
   useEffect(() => {
     axios
       .get<Status[]>('http://ggustac-002-site1.htempurl.com/api/Candidato/tipoStatus')
@@ -85,6 +77,7 @@ export default function CandidatoForm() {
       .catch((error) => console.error('Erro ao carregar estados:', error));
   }, []);
 
+  // Carregar municípios ao selecionar UF
   useEffect(() => {
     if (uf) {
       axios
@@ -94,39 +87,31 @@ export default function CandidatoForm() {
     }
   }, [uf]);
 
+  // Carregar dados do candidato se houver um ID
   useEffect(() => {
-    console.log('ID do candidato recebido:', id);
-
     if (id) {
       setLoading(true);
       axios
         .get(`http://ggustac-002-site1.htempurl.com/api/Candidato/${id}/dadosCompletos`)
         .then((response) => {
-          console.log(`Dados completos do candidato com ID ${id}:`, response.data);
-          if (response.data) {
-            const candidato = response.data; // Acesso direto aos dados
-            setNomeCompleto(candidato.nomeCompleto || '');
-            setNomeUrna(candidato.nomeUrna || '');
-            setDataNascimento(candidato.dataNascimento?.split('T')[0] || '');
-            setUf(candidato.uf || '');
-            setMunicipio(candidato.municipio || '');
-            setFoto(candidato.foto || '');
-            setIdStatus(candidato.idStatus || 0);
-            setIdPartidoPolitico(candidato.idPartidoPolitico || 0);
-            setIdCargoDisputado(candidato.idCargoDisputado || 0);
-          } else {
-            showMessage('error', 'Candidato não encontrado.');
-          }
+          const candidato = response.data;
+          setNomeCompleto(candidato.nomeCompleto || '');
+          setNomeUrna(candidato.nomeUrna || '');
+          setDataNascimento(candidato.dataNascimento?.split('T')[0] || ''); // Ajustar formato da data
+          setUf(candidato.uf || '');
+          setMunicipio(candidato.municipio || '');
+          setFoto(candidato.foto || '');
+          setIdStatus(candidato.idStatus || 0);
+          setIdPartidoPolitico(candidato.idPartidoPolitico || 0);
+          setIdCargoDisputado(candidato.idCargoDisputado || 0);
           setLoading(false);
         })
         .catch((error) => {
           console.error('Erro ao buscar os detalhes do candidato:', error);
           setLoading(false);
-          showMessage('error', 'Erro ao buscar detalhes do candidato.');
         });
     }
   }, [id]);
-
 
   const handleDateChange = (text: string) => {
     const cleaned = text.replace(/[^0-9]/g, '');
@@ -171,47 +156,74 @@ export default function CandidatoForm() {
 
   const validateFields = () => {
     if (!nomeCompleto) {
-      showMessage('error', 'Nome completo é obrigatório.');
+      showMessage({
+        message: 'Nome completo é obrigatório.',
+        type: 'danger',
+      });
       return false;
     }
 
     if (!nomeUrna) {
-      showMessage('error', 'Nome na urna é obrigatório.');
+      showMessage({
+        message: 'Nome na urna é obrigatório.',
+        type: 'danger',
+      });
       return false;
     }
 
     if (!dataNascimento || !dataNascimento.includes('/')) {
-      showMessage('error', 'A data de nascimento está no formato inválido. Use o formato DD/MM/YYYY.');
+      showMessage({
+        message: 'A data de nascimento está no formato inválido. Use o formato DD/MM/YYYY.',
+        type: 'danger',
+      });
       return false;
     }
 
     if (!uf) {
-      showMessage('error', 'Selecione o estado (UF).');
+      showMessage({
+        message: 'Selecione o estado (UF).',
+        type: 'danger',
+      });
       return false;
     }
 
     if (!municipio) {
-      showMessage('error', 'Selecione o município.');
+      showMessage({
+        message: 'Selecione o município.',
+        type: 'danger',
+      });
       return false;
     }
 
     if (foto && !isValidUrl(foto)) {
-      showMessage('error', 'A URL da foto é inválida.');
+      showMessage({
+        message: 'A URL da foto é inválida.',
+        type: 'danger',
+      });
       return false;
     }
 
     if (!idStatus || idStatus === 0) {
-      showMessage('error', 'Selecione um status.');
+      showMessage({
+        message: 'Selecione um status.',
+        type: 'danger',
+      });
       return false;
     }
 
     if (!idPartidoPolitico || idPartidoPolitico === 0) {
-      showMessage('error', 'Selecione um partido político.');
+      showMessage({
+        message: 'Selecione um partido político.',
+        type: 'danger',
+      });
       return false;
     }
 
     if (!idCargoDisputado || idCargoDisputado === 0) {
-      showMessage('error', 'Selecione um cargo disputado.');
+      showMessage({
+        message: 'Selecione um cargo disputado.',
+        type: 'danger',
+      });
       return false;
     }
 
@@ -226,7 +238,6 @@ export default function CandidatoForm() {
     const formattedDate = formatDateForApi(dataNascimento);
 
     const candidato = {
-      id: id ? parseInt(id, 10) : 0,
       nomeCompleto,
       nomeUrna,
       dataNascimento: formattedDate,
@@ -239,28 +250,41 @@ export default function CandidatoForm() {
     };
 
     if (id) {
+      // Atualizar candidato existente
       axios
         .put(`http://ggustac-002-site1.htempurl.com/api/Candidato/${id}`, candidato)
         .then(() => {
-          showMessage('success', 'Candidato atualizado com sucesso!');
-          clearFields();
+          showMessage({
+            message: 'Candidato atualizado com sucesso!',
+            type: 'success',
+          });
           router.push('/candidato/list');
         })
         .catch((error) => {
-          console.error('Erro ao atualizar candidato:', error.response ? error.response.data : error);
-          showMessage('error', 'Erro ao atualizar candidato.');
+          console.error('Erro ao atualizar candidato:', error);
+          showMessage({
+            message: 'Erro ao atualizar candidato.',
+            type: 'danger',
+          });
         });
     } else {
+      // Criar novo candidato
       axios
         .post('http://ggustac-002-site1.htempurl.com/api/Candidato', candidato)
         .then(() => {
-          showMessage('success', 'Candidato cadastrado com sucesso!');
+          showMessage({
+            message: 'Candidato cadastrado com sucesso!',
+            type: 'success',
+          });
           clearFields();
           router.push('/candidato/list');
         })
         .catch((error) => {
-          console.error('Erro ao cadastrar candidato:', error.response ? error.response.data : error);
-          showMessage('error', 'Erro ao cadastrar candidato.');
+          console.error('Erro ao cadastrar candidato:', error);
+          showMessage({
+            message: 'Erro ao cadastrar candidato.',
+            type: 'danger',
+          });
         });
     }
   };
@@ -272,18 +296,6 @@ export default function CandidatoForm() {
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <Text style={styles.title}>{id ? 'Editar Candidato' : 'Cadastro de Candidato'}</Text>
-
-      {message && (
-        <View style={[styles.messageBox, messageType === 'success' ? styles.successBox : styles.errorBox]}>
-          <Ionicons
-            name={messageType === 'success' ? 'checkmark-circle' : 'close-circle'}
-            size={24}
-            color={messageType === 'success' ? '#155724' : '#721c24'}
-            style={styles.messageIcon}
-          />
-          <Text style={styles.messageText}>{message}</Text>
-        </View>
-      )}
 
       <Text>Nome Completo</Text>
       <TextInput
@@ -338,11 +350,11 @@ export default function CandidatoForm() {
       <TextInput
         style={styles.input}
         value={foto}
-        onChangeText={(text) => isValidUrl(text) ? setFoto(text) : showMessage('error', 'URL inválida')}
+        onChangeText={(text) => isValidUrl(text) ? setFoto(text) : showMessage({ message: 'URL inválida', type: 'danger' })}
         placeholder="URL da Foto"
       />
       {foto && isValidUrl(foto) ? (
-        <Image source={{ uri: foto }} style={styles.image} onError={() => showMessage('error', 'Erro ao carregar a imagem')} />
+        <Image source={{ uri: foto }} style={styles.image} onError={() => showMessage({ message: 'Erro ao carregar a imagem', type: 'danger' })} />
       ) : (
         <Text>Nenhuma imagem disponível</Text>
       )}
@@ -385,7 +397,7 @@ export default function CandidatoForm() {
 
       <View style={styles.buttonContainer}>
         <TouchableOpacity style={styles.button} onPress={handleSave}>
-          <Text style={styles.buttonText}>{id ? "Atualizar Candidato" : "Cadastrar Candidato"}</Text>
+          <Text style={styles.buttonText}>{id ? 'Atualizar Candidato' : 'Cadastrar Candidato'}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.backButton} onPress={() => router.push('/candidato/list')}>
@@ -429,34 +441,34 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   button: {
-    backgroundColor: '#1a2b52', // Cor azul escuro
+    backgroundColor: '#1a2b52',
     padding: 10,
-    borderRadius: 8, // Bordas arredondadas
+    borderRadius: 8,
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center', // Centraliza o texto verticalmente
+    justifyContent: 'center',
     marginHorizontal: 5,
   },
   buttonText: {
-    color: '#fff', // Texto branco
+    color: '#fff',
     fontWeight: 'bold',
-    fontSize: 16, // Tamanho de fonte ajustado
-    textAlign: 'center', // Centraliza o texto horizontalmente
+    fontSize: 16,
+    textAlign: 'center',
   },
   backButton: {
-    backgroundColor: '#1a2b52', // Cor azul escuro igual ao botão "Salvar"
+    backgroundColor: '#1a2b52',
     padding: 10,
-    borderRadius: 8, // Bordas arredondadas
+    borderRadius: 8,
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center', // Centraliza o texto verticalmente
+    justifyContent: 'center',
     marginHorizontal: 5,
   },
   backButtonText: {
-    color: '#fff', // Texto branco
+    color: '#fff',
     fontWeight: 'bold',
-    fontSize: 16, // Tamanho de fonte ajustado
-    textAlign: 'center', // Centraliza o texto horizontalmente
+    fontSize: 16,
+    textAlign: 'center',
   },
   messageBox: {
     padding: 10,
