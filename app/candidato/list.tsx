@@ -108,6 +108,12 @@ export default function CandidatoList() {
     </View>
   );
 
+  function navigateToDetalhe(id: number) {
+    router.push({
+      pathname: '/candidato/form',
+      params: { id },
+    });
+  }
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}

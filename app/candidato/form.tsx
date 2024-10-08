@@ -32,8 +32,8 @@ interface Municipio {
 }
 
 export default function CandidatoForm() {
-  const params = useLocalSearchParams(); 
-  const id = params?.id ? String(params.id) : null; 
+  const params = useLocalSearchParams();
+  const id = params?.id ? String(params.id) : null;
 
   const [nomeCompleto, setNomeCompleto] = useState('');
   const [nomeUrna, setNomeUrna] = useState('');
@@ -95,7 +95,7 @@ export default function CandidatoForm() {
   }, [uf]);
 
   useEffect(() => {
-    console.log('ID do candidato recebido:', id); 
+    console.log('ID do candidato recebido:', id);
 
     if (id) {
       setLoading(true);
@@ -104,7 +104,7 @@ export default function CandidatoForm() {
         .then((response) => {
           console.log(`Dados completos do candidato com ID ${id}:`, response.data);
           if (response.data) {
-            const candidato = response.data;
+            const candidato = response.data; // Acesso direto aos dados
             setNomeCompleto(candidato.nomeCompleto || '');
             setNomeUrna(candidato.nomeUrna || '');
             setDataNascimento(candidato.dataNascimento?.split('T')[0] || '');
@@ -126,6 +126,7 @@ export default function CandidatoForm() {
         });
     }
   }, [id]);
+
 
   const handleDateChange = (text: string) => {
     const cleaned = text.replace(/[^0-9]/g, '');
@@ -218,7 +219,6 @@ export default function CandidatoForm() {
   };
 
   const handleSave = () => {
-    // Valida os campos antes de tentar salvar
     if (!validateFields()) {
       return;
     }
@@ -247,7 +247,7 @@ export default function CandidatoForm() {
           router.push('/candidato/list');
         })
         .catch((error) => {
-          console.error('Erro ao atualizar candidato:', error.response ? error.response.data : error); // Captura o erro
+          console.error('Erro ao atualizar candidato:', error.response ? error.response.data : error);
           showMessage('error', 'Erro ao atualizar candidato.');
         });
     } else {
@@ -259,7 +259,7 @@ export default function CandidatoForm() {
           router.push('/candidato/list');
         })
         .catch((error) => {
-          console.error('Erro ao cadastrar candidato:', error.response ? error.response.data : error); // Captura o erro
+          console.error('Erro ao cadastrar candidato:', error.response ? error.response.data : error);
           showMessage('error', 'Erro ao cadastrar candidato.');
         });
     }
@@ -275,10 +275,10 @@ export default function CandidatoForm() {
 
       {message && (
         <View style={[styles.messageBox, messageType === 'success' ? styles.successBox : styles.errorBox]}>
-          <Ionicons 
-            name={messageType === 'success' ? 'checkmark-circle' : 'close-circle'} 
-            size={24} 
-            color={messageType === 'success' ? '#155724' : '#721c24'} 
+          <Ionicons
+            name={messageType === 'success' ? 'checkmark-circle' : 'close-circle'}
+            size={24}
+            color={messageType === 'success' ? '#155724' : '#721c24'}
             style={styles.messageIcon}
           />
           <Text style={styles.messageText}>{message}</Text>
@@ -289,7 +289,7 @@ export default function CandidatoForm() {
       <TextInput
         style={styles.input}
         value={nomeCompleto}
-        onChangeText={setNomeCompleto}
+        onChangeText={n => setNomeCompleto(n)}
         placeholder="Nome Completo"
       />
 
