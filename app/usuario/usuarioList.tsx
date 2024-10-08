@@ -81,10 +81,7 @@ export default function UsuarioList() {
 
   const renderUsuario = ({ item }: { item: Usuario }) => (
     <View style={styles.usuarioContainer}>
-      <TouchableOpacity onPress={() => {
-        console.log(`Navigating to /usuario/form?id=${item.id}`);
-        router.push(`/usuario/usuarioForm?id=${item.id}`);
-      }}>
+      <TouchableOpacity onPress={() => router.push(`/usuario/usuarioForm?id=${item.id}`)}>
         <View style={styles.usuarioInfo}>
           <Text style={styles.usuarioName}>Nome de Usuário: {item.nomeUsuario}</Text>
           <Text>Email: {item.email}</Text>
@@ -131,17 +128,17 @@ export default function UsuarioList() {
 
         <View style={styles.footer}>
           <TouchableOpacity
-            style={styles.backButton}
+            style={styles.button}
             onPress={() => router.push('/')}
           >
-            <Text style={styles.backButtonText}>Voltar</Text>
+            <Text style={styles.buttonText}>Voltar</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={styles.cadastrarButton}
-            onPress={() => router.push('./form')}
+            style={[styles.button, styles.registerButton]}
+            onPress={() => router.push('./usuarioForm')}
           >
-            <Text style={styles.cadastrarButtonText}>Cadastrar Usuário</Text>
+            <Text style={styles.buttonText}>Adicionar Usuário</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -199,31 +196,28 @@ const styles = StyleSheet.create({
   footer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#007bff',
-    padding: 15,
     marginTop: 10,
   },
-  backButton: {
-    flexDirection: 'row',
+  button: {
+    backgroundColor: '#1a2b52',
+    padding: 15,
+    borderRadius: 8,
+    flex: 1,
     alignItems: 'center',
+    marginHorizontal: 5,
+    justifyContent: 'center',
   },
-  backButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    marginLeft: 10,
-  },
-  cadastrarButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#007bff',
-    padding: 10,
-    borderRadius: 5,
-  },
-  cadastrarButtonText: {
+  buttonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
-    marginLeft: 10,
+    textAlign: 'center',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  registerButton: {
+    backgroundColor: '#1a2b52',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

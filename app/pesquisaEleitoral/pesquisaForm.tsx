@@ -111,7 +111,6 @@ export default function PesquisaEleitoralForm() {
     setLoading(true);
 
     const pesquisaData = {
-      request: "DefaultRequest",  // Adicionando o campo `request`
       id: 0,
       dataEntrevista: new Date().toISOString(),
       uf,
@@ -119,21 +118,21 @@ export default function PesquisaEleitoralForm() {
       votoIndeciso,
       votoBrancoNulo,
       sugestaoMelhoria,
-      idCandidatoPrefeito,  // Enviando o ID do candidato, não o nome
-      idCandidatoVereador,  // Enviando o ID do candidato, não o nome
+      idCandidatoPrefeito,
+      idCandidatoVereador,
       idUsuario: 1,
       idStatus: 1,
-      entrevistado: [{
-        id: 0,
-        nomeCompleto: entrevistadoNome,
-        dataNascimento: formatarDataParaApi(entrevistadoDataNascimento),
-        uf,
-        municipio,
-        celular: entrevistadoCelular,
-        idGenero,
-        idNivelEscolaridade,
-        idRendaFamiliar
-      }]
+      entrevistado: [
+        {
+          id: 0,
+          nomeCompleto: entrevistadoNome,
+          dataNascimento: formatarDataParaApi(entrevistadoDataNascimento),
+          celular: entrevistadoCelular,
+          idGenero,
+          idNivelEscolaridade,
+          idRendaFamiliar,
+        },
+      ],
     };
 
     axios.post('http://ggustac-002-site1.htempurl.com/api/PesquisaEleitoral', pesquisaData)
@@ -300,10 +299,10 @@ export default function PesquisaEleitoralForm() {
           <Text style={styles.buttonText}>Salvar Pesquisa</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.backButton} onPress={() => router.push('/')}>
-          <Icon name="arrow-left" size={24} color="#007bff" />
-          <Text style={styles.backButtonText}>Voltar</Text>
+        <TouchableOpacity style={styles.button} onPress={() => router.push('/')}>
+          <Text style={styles.buttonText}>Voltar</Text>
         </TouchableOpacity>
+
       </View>
     </ScrollView>
   );
@@ -319,6 +318,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
+    textAlign: 'center',
   },
   input: {
     height: 40,
@@ -332,17 +332,18 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   buttonContainer: {
-    marginTop: 20,
     flexDirection: 'row',
     justifyContent: 'space-between',
+    marginTop: 20,
   },
   button: {
-    backgroundColor: '#007bff',
+    backgroundColor: '#1a2b52',
     padding: 15,
-    borderRadius: 5,
+    borderRadius: 8,
     flex: 1,
     alignItems: 'center',
     marginHorizontal: 5,
+    justifyContent: 'center'
   },
   buttonText: {
     color: '#fff',
@@ -351,10 +352,10 @@ const styles = StyleSheet.create({
   backButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 20,
     backgroundColor: '#f0f0f0',
     padding: 10,
     borderRadius: 5,
+    justifyContent: 'center'
   },
   backButtonText: {
     color: '#007bff',

@@ -142,7 +142,7 @@ export default function CandidatoList() {
             style={styles.button}
             onPress={() => router.push('./form')}
           >
-            <Text style={styles.buttonText}>Cadastrar Candidato</Text>
+            <Text style={styles.buttonText}>Adicionar Candidato</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -201,20 +201,22 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   button: {
-    backgroundColor: '#007bff',
+    backgroundColor: '#1a2b52',
     padding: 15,
     borderRadius: 8,
     flex: 1,
     alignItems: 'center',
     marginHorizontal: 5,
+    justifyContent: 'center',
   },
   backButton: {
-    backgroundColor: '#6c757d',
+    backgroundColor: '#1a2b52',
   },
   buttonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
-     textAlign: 'center'
+     textAlign: 'center',
+     justifyContent: 'center',
   },
 });
