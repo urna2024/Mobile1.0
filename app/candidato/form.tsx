@@ -3,7 +3,6 @@ import { View, Text, TextInput, StyleSheet, ScrollView, ActivityIndicator, Image
 import axios from 'axios';
 import { Picker } from '@react-native-picker/picker';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
 import { showMessage } from 'react-native-flash-message';
 
 interface Status {
@@ -34,7 +33,7 @@ interface Municipio {
 
 export default function CandidatoForm() {
   const params = useLocalSearchParams();
-  const id = params?.id ? String(params.id) : null;
+  const id = params?.id ? String(params.id) : null;  // Capturando o ID do candidato, se houver
 
   const [nomeCompleto, setNomeCompleto] = useState('');
   const [nomeUrna, setNomeUrna] = useState('');
@@ -54,7 +53,7 @@ export default function CandidatoForm() {
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
 
-  // Carregar opções de status, partidos e cargos
+  // Carregar opções de status, partidos, cargos, estados e municípios
   useEffect(() => {
     axios
       .get<Status[]>('http://ggustac-002-site1.htempurl.com/api/Candidato/tipoStatus')
@@ -77,7 +76,6 @@ export default function CandidatoForm() {
       .catch((error) => console.error('Erro ao carregar estados:', error));
   }, []);
 
-  
   useEffect(() => {
     if (uf) {
       axios
@@ -142,54 +140,10 @@ export default function CandidatoForm() {
     }
   };
 
-  const clearFields = () => {
-    setNomeCompleto('');
-    setNomeUrna('');
-    setDataNascimento('');
-    setUf('');
-    setMunicipio('');
-    setFoto('');
-    setIdStatus(0);
-    setIdPartidoPolitico(0);
-    setIdCargoDisputado(0);
-  };
-
   const validateFields = () => {
-    if (!nomeCompleto) {
+    if (!nomeCompleto || !nomeUrna || !dataNascimento || !uf || !municipio || !idStatus || !idPartidoPolitico || !idCargoDisputado) {
       showMessage({
-        message: 'Nome completo é obrigatório.',
-        type: 'danger',
-      });
-      return false;
-    }
-
-    if (!nomeUrna) {
-      showMessage({
-        message: 'Nome na urna é obrigatório.',
-        type: 'danger',
-      });
-      return false;
-    }
-
-    if (!dataNascimento || !dataNascimento.includes('/')) {
-      showMessage({
-        message: 'A data de nascimento está no formato inválido. Use o formato DD/MM/YYYY.',
-        type: 'danger',
-      });
-      return false;
-    }
-
-    if (!uf) {
-      showMessage({
-        message: 'Selecione o estado (UF).',
-        type: 'danger',
-      });
-      return false;
-    }
-
-    if (!municipio) {
-      showMessage({
-        message: 'Selecione o município.',
+        message: 'Preencha todos os campos obrigatórios!',
         type: 'danger',
       });
       return false;
@@ -203,31 +157,19 @@ export default function CandidatoForm() {
       return false;
     }
 
-    if (!idStatus || idStatus === 0) {
-      showMessage({
-        message: 'Selecione um status.',
-        type: 'danger',
-      });
-      return false;
-    }
-
-    if (!idPartidoPolitico || idPartidoPolitico === 0) {
-      showMessage({
-        message: 'Selecione um partido político.',
-        type: 'danger',
-      });
-      return false;
-    }
-
-    if (!idCargoDisputado || idCargoDisputado === 0) {
-      showMessage({
-        message: 'Selecione um cargo disputado.',
-        type: 'danger',
-      });
-      return false;
-    }
-
     return true;
+  };
+
+  const clearFields = () => {
+    setNomeCompleto('');
+    setNomeUrna('');
+    setDataNascimento('');
+    setUf('');
+    setMunicipio('');
+    setFoto('');
+    setIdStatus(0);
+    setIdPartidoPolitico(0);
+    setIdCargoDisputado(0);
   };
 
   const handleSave = () => {
@@ -301,7 +243,7 @@ export default function CandidatoForm() {
       <TextInput
         style={styles.input}
         value={nomeCompleto}
-        onChangeText={n => setNomeCompleto(n)}
+        onChangeText={setNomeCompleto}
         placeholder="Nome Completo"
       />
 
@@ -325,7 +267,7 @@ export default function CandidatoForm() {
       <Text>UF</Text>
       <Picker
         selectedValue={uf}
-        onValueChange={(itemValue) => setUf(itemValue)}
+        onValueChange={setUf}
         style={styles.picker}
       >
         <Picker.Item label="Selecione o Estado" value="" />
@@ -337,7 +279,7 @@ export default function CandidatoForm() {
       <Text>Município</Text>
       <Picker
         selectedValue={municipio}
-        onValueChange={(itemValue) => setMunicipio(itemValue)}
+        onValueChange={setMunicipio}
         style={styles.picker}
       >
         <Picker.Item label="Selecione o Município" value="" />
@@ -350,11 +292,11 @@ export default function CandidatoForm() {
       <TextInput
         style={styles.input}
         value={foto}
-        onChangeText={(text) => isValidUrl(text) ? setFoto(text) : showMessage({ message: 'URL inválida', type: 'danger' })}
+        onChangeText={(text) => setFoto(text)}
         placeholder="URL da Foto"
       />
       {foto && isValidUrl(foto) ? (
-        <Image source={{ uri: foto }} style={styles.image} onError={() => showMessage({ message: 'Erro ao carregar a imagem', type: 'danger' })} />
+        <Image source={{ uri: foto }} style={styles.image} />
       ) : (
         <Text>Nenhuma imagem disponível</Text>
       )}
@@ -469,29 +411,5 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
     textAlign: 'center',
-  },
-  messageBox: {
-    padding: 10,
-    borderRadius: 5,
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 15,
-  },
-  successBox: {
-    backgroundColor: '#d4edda',
-    borderColor: '#c3e6cb',
-  },
-  errorBox: {
-    backgroundColor: '#f8d7da',
-    borderColor: '#f5c6cb',
-  },
-  messageText: {
-    color: '#155724',
-    fontSize: 16,
-    textAlign: 'center',
-    flex: 1,
-  },
-  messageIcon: {
-    marginRight: 10,
   },
 });

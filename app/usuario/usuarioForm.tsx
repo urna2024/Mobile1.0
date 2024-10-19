@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity, Modal, Button, Platform } from 'react-native';
 import axios from 'axios';
 import { Picker } from '@react-native-picker/picker';
 import FlashMessage, { showMessage } from 'react-native-flash-message';
@@ -26,6 +26,8 @@ export default function CadastroUsuario() {
   const [perfilOptions, setPerfilOptions] = useState<PerfilUsuario[]>([]);
   const [loading, setLoading] = useState(true);
   const [cadastrando, setCadastrando] = useState(false);
+  const [showStatusPicker, setShowStatusPicker] = useState(false);
+  const [showPerfilPicker, setShowPerfilPicker] = useState(false);
   const router = useRouter(); // Para navegação
 
   const fetchOptions = async () => {
@@ -127,29 +129,91 @@ export default function CadastroUsuario() {
         secureTextEntry={true}
       />
 
+      {/* Seletor de Status */}
       <Text>Status</Text>
-      <Picker
-        selectedValue={idStatus}
-        onValueChange={(itemValue: number) => setIdStatus(itemValue)}
-        style={styles.picker}
-      >
-        <Picker.Item label="Selecione o Status" value={0} />
-        {statusOptions.map((status) => (
-          <Picker.Item key={status.id} label={status.nome} value={status.id} />
-        ))}
-      </Picker>
+      {Platform.OS === 'ios' ? (
+        <>
+          <TouchableOpacity
+            style={styles.pickerButton}
+            onPress={() => setShowStatusPicker(true)}
+          >
+            <Text>{idStatus ? statusOptions.find(option => option.id === idStatus)?.nome : 'Selecione o Status'}</Text>
+          </TouchableOpacity>
+          <Modal visible={showStatusPicker} transparent={true} animationType="slide">
+            <View style={styles.modalContainer}>
+              <View style={styles.modalContent}>
+                <Picker
+                  selectedValue={idStatus}
+                  onValueChange={(itemValue: number) => {
+                    setIdStatus(itemValue);
+                    setShowStatusPicker(false);
+                  }}
+                >
+                  <Picker.Item label="Selecione o Status" value={0} />
+                  {statusOptions.map((status) => (
+                    <Picker.Item key={status.id} label={status.nome} value={status.id} />
+                  ))}
+                </Picker>
+                <Button title="Fechar" onPress={() => setShowStatusPicker(false)} />
+              </View>
+            </View>
+          </Modal>
+        </>
+      ) : (
+        <Picker
+          selectedValue={idStatus}
+          onValueChange={(itemValue: number) => setIdStatus(itemValue)}
+          style={styles.picker}
+        >
+          <Picker.Item label="Selecione o Status" value={0} />
+          {statusOptions.map((status) => (
+            <Picker.Item key={status.id} label={status.nome} value={status.id} />
+          ))}
+        </Picker>
+      )}
 
+      {/* Seletor de Perfil */}
       <Text>Perfil de Usuário</Text>
-      <Picker
-        selectedValue={idPerfilUsuario}
-        onValueChange={(itemValue: number) => setIdPerfilUsuario(itemValue)}
-        style={styles.picker}
-      >
-        <Picker.Item label="Selecione o Perfil de Usuário" value={0} />
-        {perfilOptions.map((perfil) => (
-          <Picker.Item key={perfil.id} label={perfil.nome} value={perfil.id} />
-        ))}
-      </Picker>
+      {Platform.OS === 'ios' ? (
+        <>
+          <TouchableOpacity
+            style={styles.pickerButton}
+            onPress={() => setShowPerfilPicker(true)}
+          >
+            <Text>{idPerfilUsuario ? perfilOptions.find(option => option.id === idPerfilUsuario)?.nome : 'Selecione o Perfil de Usuário'}</Text>
+          </TouchableOpacity>
+          <Modal visible={showPerfilPicker} transparent={true} animationType="slide">
+            <View style={styles.modalContainer}>
+              <View style={styles.modalContent}>
+                <Picker
+                  selectedValue={idPerfilUsuario}
+                  onValueChange={(itemValue: number) => {
+                    setIdPerfilUsuario(itemValue);
+                    setShowPerfilPicker(false);
+                  }}
+                >
+                  <Picker.Item label="Selecione o Perfil de Usuário" value={0} />
+                  {perfilOptions.map((perfil) => (
+                    <Picker.Item key={perfil.id} label={perfil.nome} value={perfil.id} />
+                  ))}
+                </Picker>
+                <Button title="Fechar" onPress={() => setShowPerfilPicker(false)} />
+              </View>
+            </View>
+          </Modal>
+        </>
+      ) : (
+        <Picker
+          selectedValue={idPerfilUsuario}
+          onValueChange={(itemValue: number) => setIdPerfilUsuario(itemValue)}
+          style={styles.picker}
+        >
+          <Picker.Item label="Selecione o Perfil de Usuário" value={0} />
+          {perfilOptions.map((perfil) => (
+            <Picker.Item key={perfil.id} label={perfil.nome} value={perfil.id} />
+          ))}
+        </Picker>
+      )}
 
       <View style={styles.buttonContainer}>
         <TouchableOpacity style={styles.button} onPress={handleCadastro} disabled={cadastrando}>
@@ -190,39 +254,59 @@ const styles = StyleSheet.create({
     height: 50,
     marginBottom: 10,
   },
+  pickerButton: {
+    height: 50,
+    backgroundColor: '#fff',
+    justifyContent: 'center',
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    marginBottom: 10,
+  },
   buttonContainer: {
     marginTop: 20,
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
   button: {
-    backgroundColor: '#1a2b52', 
+    backgroundColor: '#1a2b52',
     padding: 10,
-    borderRadius: 8, 
+    borderRadius: 8,
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center', 
+    justifyContent: 'center',
     marginHorizontal: 5,
   },
   buttonText: {
-    color: '#fff', 
+    color: '#fff',
     fontWeight: 'bold',
-    fontSize: 16, 
-    textAlign: 'center', 
+    fontSize: 16,
+    textAlign: 'center',
   },
   backButton: {
-    backgroundColor: '#1a2b52', 
+    backgroundColor: '#1a2b52',
     padding: 10,
-    borderRadius: 8, 
+    borderRadius: 8,
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center', 
+    justifyContent: 'center',
     marginHorizontal: 5,
   },
   backButtonText: {
-    color: '#fff', 
+    color: '#fff',
     fontWeight: 'bold',
-    fontSize: 16, 
-    textAlign: 'center', 
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    padding: 20,
+    margin: 20,
+    borderRadius: 8,
   },
 });

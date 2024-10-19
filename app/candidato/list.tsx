@@ -37,16 +37,12 @@ export default function CandidatoList() {
 
   const renderCandidato = ({ item }: { item: Candidato }) => (
     <View style={styles.candidatoContainer}>
-      <TouchableOpacity onPress={() => {
-        // Navegando para a página do formulário com o ID do candidato
-        router.push(`/candidato/form?id=${item.id}`);
-      }}>
+      <TouchableOpacity onPress={() => router.push(`/candidato/form?id=${item.id}`)}>
         <View style={styles.candidatoInfo}>
           <Text style={styles.candidatoName}>Nome Completo: {item.nomeCompleto}</Text>
           <Text>Nome Urna: {item.nomeUrna}</Text>
           <Text>UF: {item.uf}</Text>
           <Text>Município: {item.municipio}</Text>
-          
         </View>
       </TouchableOpacity>
     </View>

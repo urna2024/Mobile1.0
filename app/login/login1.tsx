@@ -8,6 +8,7 @@ import { useFonts, Cabin_400Regular, Cabin_700Bold } from '@expo-google-fonts/ca
 export default function LoginScreen() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [loading, setLoading] = useState(false); // Para mostrar o estado de carregamento durante o login
     const router = useRouter();
 
     // Carregar as fontes Cabin
@@ -26,24 +27,32 @@ export default function LoginScreen() {
     }
 
     const handleLogin = async () => {
+        setLoading(true); // Ativa o estado de carregamento
+
         try {
-            const response = await axios.post('http://ggustac-002-site1.htempurl.com/api/login', {
+            const response = await axios.post('http://ggustac-002-site1.htempurl.com/api/Seguranca/Login', {
                 email,
-                password,
+                senha: password, // Certifique-se de que a API espera 'senha' no corpo da requisição
             });
 
             if (response.status === 200) {
                 const token = response.data.token;
-                await AsyncStorage.setItem('token', token);
+                await AsyncStorage.setItem('token', token); // Armazena o token no AsyncStorage
 
-                // Navegar para a página inicial da pesquisa eleitoral
-                router.push('./candidato/list');
+                // Verifica se o token foi armazenado corretamente
+                const storedToken = await AsyncStorage.getItem('token');
+                console.log('Token armazenado:', storedToken); // Certifique-se de que o token foi salvo corretamente
+
+                // Redirecionar o usuário para a tela de lista de candidatos
+                router.replace('/candidato/list'); // Usa replace para não manter a página de login no histórico
             } else {
                 Alert.alert('Erro', 'Credenciais inválidas. Por favor, tente novamente.');
             }
         } catch (error) {
             console.error('Erro ao fazer login:', error);
             Alert.alert('Erro', 'Ocorreu um erro durante o login. Verifique sua conexão.');
+        } finally {
+            setLoading(false); // Desativa o estado de carregamento após o login
         }
     };
 
@@ -84,9 +93,14 @@ export default function LoginScreen() {
                     secureTextEntry
                 />
 
-                <TouchableOpacity style={styles.button} onPress={handleLogin}>
-                    <Text style={styles.buttonText}>Entrar</Text>
-                </TouchableOpacity>
+                {/* Exibir um indicador de carregamento ao pressionar "Entrar" */}
+                {loading ? (
+                    <ActivityIndicator size="large" color="#007bff" />
+                ) : (
+                    <TouchableOpacity style={styles.button} onPress={handleLogin}>
+                        <Text style={styles.buttonText}>Entrar</Text>
+                    </TouchableOpacity>
+                )}
             </View>
         </ImageBackground>
     );

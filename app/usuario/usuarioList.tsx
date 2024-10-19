@@ -54,31 +54,7 @@ export default function UsuarioList() {
     }, [])
   );
 
-  const alterarStatus = async (id: number, newStatusId: number) => {
-    const usuarioAtual = usuarios.find((usuario) => usuario.id === id);
-
-    if (!usuarioAtual || usuarioAtual.idStatus === newStatusId) {
-      return;
-    }
-
-    try {
-      await axios.patch(
-        `http://ggustac-002-site1.htempurl.com/api/Usuario/${id}/mudarStatus`,
-        JSON.stringify(newStatusId),
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-      Alert.alert('Sucesso', 'Status do usuário alterado com sucesso!');
-      fetchUsuarios();
-    } catch (error) {
-      console.error('Erro ao alterar status do usuário:', error);
-      Alert.alert('Erro', 'Ocorreu um erro ao alterar o status do usuário.');
-    }
-  };
-
+  
   const renderUsuario = ({ item }: { item: Usuario }) => (
     <View style={styles.usuarioContainer}>
       <TouchableOpacity onPress={() => router.push(`/usuario/usuarioForm?id=${item.id}`)}>
@@ -89,19 +65,9 @@ export default function UsuarioList() {
         </View>
       </TouchableOpacity>
 
-      <View style={styles.actionContainer}>
-        <Text>Status:</Text>
-        <Picker
-          selectedValue={item.idStatus}
-          onValueChange={(value) => alterarStatus(item.id, value)}
-          style={styles.picker}
-        >
-          {statusOptions.map((status) => (
-            <Picker.Item key={status.id} label={status.nome} value={status.id} />
-          ))}
-        </Picker>
+      
+          
       </View>
-    </View>
   );
 
   return (
