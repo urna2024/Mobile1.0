@@ -55,7 +55,7 @@ export default function CandidatoList() {
     >
       <View style={styles.container}>
         <View style={styles.header}>
-          <Image source={require('../../assets/images/logo.jpeg')} style={styles.logo} />
+          
           <Text style={styles.title}>Lista de Candidatos</Text>
         </View>
 
@@ -80,7 +80,7 @@ export default function CandidatoList() {
 
           <TouchableOpacity
             style={styles.button}
-            onPress={() => router.push('./form')}
+            onPress={() => router.push('/candidato/form')}
           >
             <Text style={styles.buttonText}>Adicionar Candidato</Text>
           </TouchableOpacity>

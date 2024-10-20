@@ -3,7 +3,7 @@ import { View, Text, TextInput, StyleSheet, ScrollView, ActivityIndicator, Touch
 import axios from 'axios';
 import { Picker } from '@react-native-picker/picker';
 import FlashMessage, { showMessage } from 'react-native-flash-message';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 
 interface Status {
   id: number;
@@ -26,9 +26,13 @@ export default function CadastroUsuario() {
   const [perfilOptions, setPerfilOptions] = useState<PerfilUsuario[]>([]);
   const [loading, setLoading] = useState(true);
   const [cadastrando, setCadastrando] = useState(false);
-  const [showStatusPicker, setShowStatusPicker] = useState(false);
-  const [showPerfilPicker, setShowPerfilPicker] = useState(false);
-  const router = useRouter(); // Para navegação
+  const router = useRouter();
+  const params = useLocalSearchParams();
+  const id = params?.id ? String(params.id) : null;  // Capturando o ID do usuário, se houver
+
+  useEffect(() => {
+    console.log("ID capturado:", id);  // Verificar se o ID está sendo capturado corretamente
+  }, [id]);
 
   const fetchOptions = async () => {
     try {
@@ -49,9 +53,35 @@ export default function CadastroUsuario() {
     }
   };
 
+  const fetchUsuario = async (usuarioId: string) => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`http://ggustac-002-site1.htempurl.com/api/Usuario/${usuarioId}/dadosCompletos`);
+      const usuario = response.data;
+
+      console.log("Dados do usuário:", usuario);  // Verificar os dados retornados
+
+      // Preenchendo os campos do formulário com os dados do usuário
+      setNomeUsuario(usuario.nomeUsuario || '');
+      setEmail(usuario.email || '');
+      setIdStatus(usuario.idStatus || 0);
+      setIdPerfilUsuario(usuario.idPerfilUsuario || 0);
+      setPrecisaTrocarSenha(usuario.precisaTrocarSenha);
+
+      setLoading(false);
+    } catch (error) {
+      console.error('Erro ao buscar os dados do usuário:', error);
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchOptions();
-  }, []);
+    if (id) {
+      // Se o ID estiver presente, buscar os dados do usuário para edição
+      fetchUsuario(id);
+    }
+  }, [id]);
 
   const handleCadastro = async () => {
     setCadastrando(true);
@@ -65,27 +95,40 @@ export default function CadastroUsuario() {
     };
 
     try {
-      await axios.post('http://ggustac-002-site1.htempurl.com/api/Usuario', dadosUsuario);
+      if (id) {
+        // Atualizar o usuário existente
+        await axios.put(`http://ggustac-002-site1.htempurl.com/api/Usuario/${id}`, dadosUsuario);
+        showMessage({
+          message: 'Sucesso',
+          description: 'Usuário atualizado com sucesso!',
+          type: 'success',
+          icon: 'success',
+          duration: 3000,
+        });
+      } else {
+        // Criar um novo usuário
+        await axios.post('http://ggustac-002-site1.htempurl.com/api/Usuario', dadosUsuario);
+        showMessage({
+          message: 'Sucesso',
+          description: 'Usuário cadastrado com sucesso!',
+          type: 'success',
+          icon: 'success',
+          duration: 3000,
+        });
 
-      showMessage({
-        message: 'Sucesso',
-        description: 'Usuário cadastrado com sucesso!',
-        type: 'success',
-        icon: 'success',
-        duration: 3000,
-      });
-
-      setNomeUsuario('');
-      setEmail('');
-      setSenha('');
-      setIdStatus(0);
-      setIdPerfilUsuario(0);
-      setPrecisaTrocarSenha(true);
+        // Resetar os campos
+        setNomeUsuario('');
+        setEmail('');
+        setSenha('');
+        setIdStatus(0);
+        setIdPerfilUsuario(0);
+        setPrecisaTrocarSenha(true);
+      }
     } catch (error) {
       console.error('Erro ao cadastrar usuário:', error);
       showMessage({
         message: 'Erro',
-        description: 'Ocorreu um erro ao cadastrar o usuário.',
+        description: 'Ocorreu um erro ao salvar o usuário.',
         type: 'danger',
         icon: 'danger',
         duration: 3000,
@@ -101,7 +144,7 @@ export default function CadastroUsuario() {
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.title}>Cadastro de Usuário</Text>
+      <Text style={styles.title}>{id ? 'Editar Usuário' : 'Cadastro de Usuário'}</Text>
 
       <Text>Nome de Usuário</Text>
       <TextInput
@@ -120,104 +163,46 @@ export default function CadastroUsuario() {
         keyboardType="email-address"
       />
 
-      <Text>Senha</Text>
-      <TextInput
-        style={styles.input}
-        value={senha}
-        onChangeText={setSenha}
-        placeholder="Digite a senha"
-        secureTextEntry={true}
-      />
+      {!id && (
+        <>
+          <Text>Senha</Text>
+          <TextInput
+            style={styles.input}
+            value={senha}
+            onChangeText={setSenha}
+            placeholder="Digite a senha"
+            secureTextEntry={true}
+          />
+        </>
+      )}
 
-      {/* Seletor de Status */}
       <Text>Status</Text>
-      {Platform.OS === 'ios' ? (
-        <>
-          <TouchableOpacity
-            style={styles.pickerButton}
-            onPress={() => setShowStatusPicker(true)}
-          >
-            <Text>{idStatus ? statusOptions.find(option => option.id === idStatus)?.nome : 'Selecione o Status'}</Text>
-          </TouchableOpacity>
-          <Modal visible={showStatusPicker} transparent={true} animationType="slide">
-            <View style={styles.modalContainer}>
-              <View style={styles.modalContent}>
-                <Picker
-                  selectedValue={idStatus}
-                  onValueChange={(itemValue: number) => {
-                    setIdStatus(itemValue);
-                    setShowStatusPicker(false);
-                  }}
-                >
-                  <Picker.Item label="Selecione o Status" value={0} />
-                  {statusOptions.map((status) => (
-                    <Picker.Item key={status.id} label={status.nome} value={status.id} />
-                  ))}
-                </Picker>
-                <Button title="Fechar" onPress={() => setShowStatusPicker(false)} />
-              </View>
-            </View>
-          </Modal>
-        </>
-      ) : (
-        <Picker
-          selectedValue={idStatus}
-          onValueChange={(itemValue: number) => setIdStatus(itemValue)}
-          style={styles.picker}
-        >
-          <Picker.Item label="Selecione o Status" value={0} />
-          {statusOptions.map((status) => (
-            <Picker.Item key={status.id} label={status.nome} value={status.id} />
-          ))}
-        </Picker>
-      )}
+      <Picker
+        selectedValue={idStatus}
+        onValueChange={(itemValue: number) => setIdStatus(itemValue)}
+        style={styles.picker}
+      >
+        <Picker.Item label="Selecione o Status" value={0} />
+        {statusOptions.map((status) => (
+          <Picker.Item key={status.id} label={status.nome} value={status.id} />
+        ))}
+      </Picker>
 
-      {/* Seletor de Perfil */}
       <Text>Perfil de Usuário</Text>
-      {Platform.OS === 'ios' ? (
-        <>
-          <TouchableOpacity
-            style={styles.pickerButton}
-            onPress={() => setShowPerfilPicker(true)}
-          >
-            <Text>{idPerfilUsuario ? perfilOptions.find(option => option.id === idPerfilUsuario)?.nome : 'Selecione o Perfil de Usuário'}</Text>
-          </TouchableOpacity>
-          <Modal visible={showPerfilPicker} transparent={true} animationType="slide">
-            <View style={styles.modalContainer}>
-              <View style={styles.modalContent}>
-                <Picker
-                  selectedValue={idPerfilUsuario}
-                  onValueChange={(itemValue: number) => {
-                    setIdPerfilUsuario(itemValue);
-                    setShowPerfilPicker(false);
-                  }}
-                >
-                  <Picker.Item label="Selecione o Perfil de Usuário" value={0} />
-                  {perfilOptions.map((perfil) => (
-                    <Picker.Item key={perfil.id} label={perfil.nome} value={perfil.id} />
-                  ))}
-                </Picker>
-                <Button title="Fechar" onPress={() => setShowPerfilPicker(false)} />
-              </View>
-            </View>
-          </Modal>
-        </>
-      ) : (
-        <Picker
-          selectedValue={idPerfilUsuario}
-          onValueChange={(itemValue: number) => setIdPerfilUsuario(itemValue)}
-          style={styles.picker}
-        >
-          <Picker.Item label="Selecione o Perfil de Usuário" value={0} />
-          {perfilOptions.map((perfil) => (
-            <Picker.Item key={perfil.id} label={perfil.nome} value={perfil.id} />
-          ))}
-        </Picker>
-      )}
+      <Picker
+        selectedValue={idPerfilUsuario}
+        onValueChange={(itemValue: number) => setIdPerfilUsuario(itemValue)}
+        style={styles.picker}
+      >
+        <Picker.Item label="Selecione o Perfil de Usuário" value={0} />
+        {perfilOptions.map((perfil) => (
+          <Picker.Item key={perfil.id} label={perfil.nome} value={perfil.id} />
+        ))}
+      </Picker>
 
       <View style={styles.buttonContainer}>
         <TouchableOpacity style={styles.button} onPress={handleCadastro} disabled={cadastrando}>
-          <Text style={styles.buttonText}>{cadastrando ? "Cadastrando..." : "Cadastrar Usuário"}</Text>
+          <Text style={styles.buttonText}>{cadastrando ? 'Salvando...' : id ? 'Salvar Alterações' : 'Cadastrar Usuário'}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.backButton} onPress={() => router.push('/usuario/usuarioList')}>
@@ -229,7 +214,6 @@ export default function CadastroUsuario() {
     </ScrollView>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,

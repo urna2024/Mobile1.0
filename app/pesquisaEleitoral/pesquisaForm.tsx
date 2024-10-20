@@ -107,9 +107,9 @@ export default function PesquisaEleitoralForm() {
       Alert.alert('Erro', 'Preencha todos os campos obrigatórios.');
       return;
     }
-
+  
     setLoading(true);
-
+  
     const pesquisaData = {
       id: 0,
       dataEntrevista: new Date().toISOString(),
@@ -118,8 +118,8 @@ export default function PesquisaEleitoralForm() {
       votoIndeciso,
       votoBrancoNulo,
       sugestaoMelhoria,
-      idCandidatoPrefeito,
-      idCandidatoVereador,
+      idCandidatoPrefeito,  // Agora enviando o ID numérico
+      idCandidatoVereador,  // Agora enviando o ID numérico
       idUsuario: 1,
       idStatus: 1,
       entrevistado: [
@@ -128,13 +128,16 @@ export default function PesquisaEleitoralForm() {
           nomeCompleto: entrevistadoNome,
           dataNascimento: formatarDataParaApi(entrevistadoDataNascimento),
           celular: entrevistadoCelular,
+          uf,
+          municipio,
           idGenero,
           idNivelEscolaridade,
           idRendaFamiliar,
         },
       ],
+      request: {}  // Adicionando um campo request vazio
     };
-
+  
     axios.post('http://ggustac-002-site1.htempurl.com/api/PesquisaEleitoral', pesquisaData)
       .then(() => {
         Alert.alert('Sucesso', 'Pesquisa eleitoral salva com sucesso!');
@@ -146,7 +149,6 @@ export default function PesquisaEleitoralForm() {
       })
       .finally(() => setLoading(false));
   };
-
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <Text style={styles.title}>Pesquisa Eleitoral</Text>
@@ -302,7 +304,6 @@ export default function PesquisaEleitoralForm() {
         <TouchableOpacity style={styles.button} onPress={() => router.push('/')}>
           <Text style={styles.buttonText}>Voltar</Text>
         </TouchableOpacity>
-
       </View>
     </ScrollView>
   );
@@ -348,18 +349,5 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#fff',
     fontWeight: 'bold',
-  },
-  backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f0f0f0',
-    padding: 10,
-    borderRadius: 5,
-    justifyContent: 'center'
-  },
-  backButtonText: {
-    color: '#007bff',
-    fontSize: 16,
-    marginLeft: 10,
   },
 });

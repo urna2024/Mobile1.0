@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, StyleSheet, ScrollView, ActivityIndicator, Image, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, StyleSheet, ScrollView, ActivityIndicator, Image, TouchableOpacity, Alert, Platform } from 'react-native';
 import axios from 'axios';
 import { Picker } from '@react-native-picker/picker';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -85,52 +85,7 @@ export default function CandidatoForm() {
     }
   }, [uf]);
 
-  // Carregar dados do candidato se houver um ID
-  useEffect(() => {
-    if (id) {
-      setLoading(true);
-      axios
-        .get(`http://ggustac-002-site1.htempurl.com/api/Candidato/${id}/dadosCompletos`)
-        .then((response) => {
-          const candidato = response.data;
-          setNomeCompleto(candidato.nomeCompleto || '');
-          setNomeUrna(candidato.nomeUrna || '');
-          setDataNascimento(candidato.dataNascimento?.split('T')[0] || '');
-          setUf(candidato.uf || '');
-          setMunicipio(candidato.municipio || '');
-          setFoto(candidato.foto || '');
-          setIdStatus(candidato.idStatus || 0);
-          setIdPartidoPolitico(candidato.idPartidoPolitico || 0);
-          setIdCargoDisputado(candidato.idCargoDisputado || 0);
-          setLoading(false);
-        })
-        .catch((error) => {
-          console.error('Erro ao buscar os detalhes do candidato:', error);
-          setLoading(false);
-        });
-    }
-  }, [id]);
-
-  const handleDateChange = (text: string) => {
-    const cleaned = text.replace(/[^0-9]/g, '');
-    let formatted = cleaned;
-    if (cleaned.length >= 2) {
-      formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(2)}`;
-    }
-    if (cleaned.length >= 4) {
-      formatted = `${formatted.slice(0, 5)}/${cleaned.slice(4, 8)}`;
-    }
-    setDataNascimento(formatted);
-  };
-
-  const formatDateForApi = (dateString: string) => {
-    const [day, month, year] = dateString.split('/');
-    if (!day || !month || !year) {
-      return '';
-    }
-    return `${year}-${month}-${day}T00:00:00.000Z`;
-  };
-
+  // Validação de URL da foto
   const isValidUrl = (url: string) => {
     try {
       new URL(url);
@@ -142,34 +97,16 @@ export default function CandidatoForm() {
 
   const validateFields = () => {
     if (!nomeCompleto || !nomeUrna || !dataNascimento || !uf || !municipio || !idStatus || !idPartidoPolitico || !idCargoDisputado) {
-      showMessage({
-        message: 'Preencha todos os campos obrigatórios!',
-        type: 'danger',
-      });
+      Alert.alert('Erro', 'Preencha todos os campos obrigatórios!');
       return false;
     }
 
     if (foto && !isValidUrl(foto)) {
-      showMessage({
-        message: 'A URL da foto é inválida.',
-        type: 'danger',
-      });
+      Alert.alert('Erro', 'A URL da foto é inválida.');
       return false;
     }
 
     return true;
-  };
-
-  const clearFields = () => {
-    setNomeCompleto('');
-    setNomeUrna('');
-    setDataNascimento('');
-    setUf('');
-    setMunicipio('');
-    setFoto('');
-    setIdStatus(0);
-    setIdPartidoPolitico(0);
-    setIdCargoDisputado(0);
   };
 
   const handleSave = () => {
@@ -177,12 +114,10 @@ export default function CandidatoForm() {
       return;
     }
 
-    const formattedDate = formatDateForApi(dataNascimento);
-
     const candidato = {
       nomeCompleto,
       nomeUrna,
-      dataNascimento: formattedDate,
+      dataNascimento,
       uf,
       municipio,
       foto,
@@ -191,43 +126,31 @@ export default function CandidatoForm() {
       idCargoDisputado: parseInt(idCargoDisputado as string, 10),
     };
 
+    setLoading(true);
     if (id) {
-      // Atualizar candidato existente
       axios
         .put(`http://ggustac-002-site1.htempurl.com/api/Candidato/${id}`, candidato)
         .then(() => {
-          showMessage({
-            message: 'Candidato atualizado com sucesso!',
-            type: 'success',
-          });
+          Alert.alert('Sucesso', 'Candidato atualizado com sucesso!');
           router.push('/candidato/list');
         })
         .catch((error) => {
           console.error('Erro ao atualizar candidato:', error);
-          showMessage({
-            message: 'Erro ao atualizar candidato.',
-            type: 'danger',
-          });
-        });
+          Alert.alert('Erro', 'Erro ao atualizar candidato.');
+        })
+        .finally(() => setLoading(false));
     } else {
-      // Criar novo candidato
       axios
         .post('http://ggustac-002-site1.htempurl.com/api/Candidato', candidato)
         .then(() => {
-          showMessage({
-            message: 'Candidato cadastrado com sucesso!',
-            type: 'success',
-          });
-          clearFields();
+          Alert.alert('Sucesso', 'Candidato cadastrado com sucesso!');
           router.push('/candidato/list');
         })
         .catch((error) => {
           console.error('Erro ao cadastrar candidato:', error);
-          showMessage({
-            message: 'Erro ao cadastrar candidato.',
-            type: 'danger',
-          });
-        });
+          Alert.alert('Erro', 'Erro ao cadastrar candidato.');
+        })
+        .finally(() => setLoading(false));
     }
   };
 
@@ -259,34 +182,38 @@ export default function CandidatoForm() {
       <TextInput
         style={styles.input}
         value={dataNascimento}
-        onChangeText={handleDateChange}
+        onChangeText={setDataNascimento}
         placeholder="DD/MM/YYYY"
         keyboardType="numeric"
       />
 
       <Text>UF</Text>
-      <Picker
-        selectedValue={uf}
-        onValueChange={setUf}
-        style={styles.picker}
-      >
-        <Picker.Item label="Selecione o Estado" value="" />
-        {ufOptions.map((uf) => (
-          <Picker.Item key={uf.sigla} label={uf.sigla} value={uf.sigla} />
-        ))}
-      </Picker>
+      <View style={styles.pickerContainer}>
+        <Picker
+          selectedValue={uf}
+          onValueChange={setUf}
+          style={styles.picker}
+        >
+          <Picker.Item label="Selecione o Estado" value="" />
+          {ufOptions.map((uf) => (
+            <Picker.Item key={uf.sigla} label={uf.sigla} value={uf.sigla} />
+          ))}
+        </Picker>
+      </View>
 
       <Text>Município</Text>
-      <Picker
-        selectedValue={municipio}
-        onValueChange={setMunicipio}
-        style={styles.picker}
-      >
-        <Picker.Item label="Selecione o Município" value="" />
-        {municipioOptions.map((municipio) => (
-          <Picker.Item key={municipio.id} label={municipio.nome} value={municipio.nome} />
-        ))}
-      </Picker>
+      <View style={styles.pickerContainer}>
+        <Picker
+          selectedValue={municipio}
+          onValueChange={setMunicipio}
+          style={styles.picker}
+        >
+          <Picker.Item label="Selecione o Município" value="" />
+          {municipioOptions.map((municipio) => (
+            <Picker.Item key={municipio.id} label={municipio.nome} value={municipio.nome} />
+          ))}
+        </Picker>
+      </View>
 
       <Text>Foto (URL)</Text>
       <TextInput
@@ -302,40 +229,46 @@ export default function CandidatoForm() {
       )}
 
       <Text>Status</Text>
-      <Picker
-        selectedValue={idStatus}
-        onValueChange={(itemValue) => setIdStatus(itemValue)}
-        style={styles.picker}
-      >
-        <Picker.Item label="Selecione o Status" value={0} />
-        {statusOptions.map((status) => (
-          <Picker.Item key={status.id} label={status.nome} value={status.id} />
-        ))}
-      </Picker>
+      <View style={styles.pickerContainer}>
+        <Picker
+          selectedValue={idStatus}
+          onValueChange={(itemValue) => setIdStatus(itemValue)}
+          style={styles.picker}
+        >
+          <Picker.Item label="Selecione o Status" value={0} />
+          {statusOptions.map((status) => (
+            <Picker.Item key={status.id} label={status.nome} value={status.id} />
+          ))}
+        </Picker>
+      </View>
 
       <Text>Partido Político</Text>
-      <Picker
-        selectedValue={idPartidoPolitico}
-        onValueChange={(itemValue) => setIdPartidoPolitico(itemValue)}
-        style={styles.picker}
-      >
-        <Picker.Item label="Selecione o Partido Político" value={0} />
-        {partidoOptions.map((partido) => (
-          <Picker.Item key={partido.id} label={partido.nome} value={partido.id} />
-        ))}
-      </Picker>
+      <View style={styles.pickerContainer}>
+        <Picker
+          selectedValue={idPartidoPolitico}
+          onValueChange={(itemValue) => setIdPartidoPolitico(itemValue)}
+          style={styles.picker}
+        >
+          <Picker.Item label="Selecione o Partido Político" value={0} />
+          {partidoOptions.map((partido) => (
+            <Picker.Item key={partido.id} label={partido.nome} value={partido.id} />
+          ))}
+        </Picker>
+      </View>
 
       <Text>Cargo Disputado</Text>
-      <Picker
-        selectedValue={idCargoDisputado}
-        onValueChange={(itemValue) => setIdCargoDisputado(itemValue)}
-        style={styles.picker}
-      >
-        <Picker.Item label="Selecione o Cargo" value={0} />
-        {cargoOptions.map((cargo) => (
-          <Picker.Item key={cargo.id} label={cargo.nome} value={cargo.id} />
-        ))}
-      </Picker>
+      <View style={styles.pickerContainer}>
+        <Picker
+          selectedValue={idCargoDisputado}
+          onValueChange={(itemValue) => setIdCargoDisputado(itemValue)}
+          style={styles.picker}
+        >
+          <Picker.Item label="Selecione o Cargo" value={0} />
+          {cargoOptions.map((cargo) => (
+            <Picker.Item key={cargo.id} label={cargo.nome} value={cargo.id} />
+          ))}
+        </Picker>
+      </View>
 
       <View style={styles.buttonContainer}>
         <TouchableOpacity style={styles.button} onPress={handleSave}>
@@ -360,6 +293,8 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
+    textAlign: 'center', 
+    alignSelf: 'center',  
   },
   input: {
     height: 40,
@@ -368,9 +303,13 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     paddingHorizontal: 8,
   },
+  pickerContainer: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    marginBottom: 10,
+  },
   picker: {
     height: 50,
-    marginBottom: 10,
   },
   image: {
     width: '100%',

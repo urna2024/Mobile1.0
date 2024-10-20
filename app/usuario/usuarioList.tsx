@@ -1,9 +1,8 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Alert, Image, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Image, KeyboardAvoidingView, Platform } from 'react-native';
 import axios from 'axios';
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
-import { Picker } from '@react-native-picker/picker';
 
 interface Usuario {
   id: number;
@@ -15,14 +14,8 @@ interface Usuario {
   perfilNome: string;
 }
 
-interface Status {
-  id: number;
-  nome: string;
-}
-
 export default function UsuarioList() {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
-  const [statusOptions, setStatusOptions] = useState<Status[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const router = useRouter();
 
@@ -38,25 +31,15 @@ export default function UsuarioList() {
     }
   };
 
-  const fetchStatusOptions = async () => {
-    try {
-      const response = await axios.get('http://ggustac-002-site1.htempurl.com/api/Candidato/tipoStatus');
-      setStatusOptions(response.data);
-    } catch (error) {
-      console.error('Erro ao buscar status:', error);
-    }
-  };
-
   useFocusEffect(
     useCallback(() => {
       fetchUsuarios();
-      fetchStatusOptions();
     }, [])
   );
 
-  
   const renderUsuario = ({ item }: { item: Usuario }) => (
     <View style={styles.usuarioContainer}>
+      {/* Passando apenas o ID do usuário via router.push */}
       <TouchableOpacity onPress={() => router.push(`/usuario/usuarioForm?id=${item.id}`)}>
         <View style={styles.usuarioInfo}>
           <Text style={styles.usuarioName}>Nome de Usuário: {item.nomeUsuario}</Text>
@@ -64,10 +47,7 @@ export default function UsuarioList() {
           <Text>Perfil: {item.perfilNome}</Text>
         </View>
       </TouchableOpacity>
-
-      
-          
-      </View>
+    </View>
   );
 
   return (
@@ -77,7 +57,6 @@ export default function UsuarioList() {
     >
       <View style={styles.container}>
         <View style={styles.header}>
-          <Image source={require('../../assets/images/logo.jpeg')} style={styles.logo} />
           <Text style={styles.title}>Lista de Usuários</Text>
         </View>
 
@@ -102,7 +81,7 @@ export default function UsuarioList() {
 
           <TouchableOpacity
             style={[styles.button, styles.registerButton]}
-            onPress={() => router.push('./usuarioForm')}
+            onPress={() => router.push('/usuario/usuarioForm')}
           >
             <Text style={styles.buttonText}>Adicionar Usuário</Text>
           </TouchableOpacity>
@@ -111,7 +90,6 @@ export default function UsuarioList() {
     </KeyboardAvoidingView>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -148,16 +126,6 @@ const styles = StyleSheet.create({
   usuarioName: {
     fontSize: 18,
     fontWeight: 'bold',
-  },
-  actionContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: 10,
-  },
-  picker: {
-    height: 40,
-    width: '50%',
   },
   footer: {
     flexDirection: 'row',
