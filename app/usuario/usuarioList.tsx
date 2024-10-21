@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Image, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import axios from 'axios';
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
@@ -39,12 +39,11 @@ export default function UsuarioList() {
 
   const renderUsuario = ({ item }: { item: Usuario }) => (
     <View style={styles.usuarioContainer}>
-      {/* Passando apenas o ID do usuário via router.push */}
       <TouchableOpacity onPress={() => router.push(`/usuario/usuarioForm?id=${item.id}`)}>
         <View style={styles.usuarioInfo}>
           <Text style={styles.usuarioName}>Nome de Usuário: {item.nomeUsuario}</Text>
           <Text>Email: {item.email}</Text>
-          <Text>Perfil: {item.perfilNome}</Text>
+          
         </View>
       </TouchableOpacity>
     </View>
@@ -56,9 +55,12 @@ export default function UsuarioList() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <View style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Lista de Usuários</Text>
-        </View>
+        <Text style={styles.title}>Lista de Usuários</Text>
+
+        {/* Botão para cadastrar novo candidato */}
+        <TouchableOpacity style={styles.newButton} onPress={() => router.push('/usuario/usuarioForm')}>
+          <Text style={styles.newButtonText}>Cadastrar Novo Usuário</Text>
+        </TouchableOpacity>
 
         {loading ? (
           <ActivityIndicator size="large" color="#0000ff" />
@@ -72,45 +74,35 @@ export default function UsuarioList() {
         )}
 
         <View style={styles.footer}>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => router.push('/')}
-          >
-            <Text style={styles.buttonText}>Voltar</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.button, styles.registerButton]}
-            onPress={() => router.push('/usuario/usuarioForm')}
-          >
-            <Text style={styles.buttonText}>Adicionar Usuário</Text>
-          </TouchableOpacity>
         </View>
       </View>
     </KeyboardAvoidingView>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
     backgroundColor: '#f5f5f5',
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 20,
-  },
-  logo: {
-    width: 50,
-    height: 50,
-    marginRight: 10,
-  },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     textAlign: 'center',
+    marginBottom: 20,
+  },
+  newButton: {
+    padding: 10, 
+    borderRadius: 8,
+    marginBottom: 20,
+    alignItems: 'center',
+    backgroundColor: '#1a2b52',
+  },
+  newButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   usuarioContainer: {
     marginBottom: 15,

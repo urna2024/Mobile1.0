@@ -1,5 +1,11 @@
-import DrawerNavigator from './drawer'; 
+import { Stack } from "expo-router";
+import DrawerNavigator from "./drawer";
 
 export default function RootLayout() {
-  return <DrawerNavigator />; 
+  return (
+   
+    <Stack>
+      
+    </Stack>
+  );
 }

@@ -8,6 +8,7 @@ import PesquisaEleitoralForm from './pesquisaEleitoral/pesquisaForm';
 import LoginScreen from './login/login1';
 import UsuarioList from './usuario/usuarioList';
 import { useNavigation } from '@react-navigation/native';
+import Principal from './principal/principal';
 
 
 
@@ -35,19 +36,17 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
 }
 
 export default function DrawerNavigator() {
-  const usuarioNome = "André Cavichiolli";  // Exemplo: nome do usuário
+  const usuarioNome = "André Cavichiolli";  // Exemplo: nome do usuário chumbado
   const iniciaisUsuario = getInitials(usuarioNome);
   const navigation = useNavigation();
-
-  // Função para mostrar o ActionSheet com opções
   const showUserOptions = () => {
     ActionSheetIOS.showActionSheetWithOptions(
       {
-        options: ['Cancelar', 'Alterar Dados do Usuário', 'Sair'],  // Tipagem correta aqui
+        options: ['Cancelar', 'Alterar Dados do Usuário', 'Sair'],
         destructiveButtonIndex: 2,  // Índice da opção "Sair"
         cancelButtonIndex: 0,
       },
-      (buttonIndex: number) => {  // Adicione explicitamente a tipagem number aqui
+      (buttonIndex: number) => { 
         if (buttonIndex === 1) {
           // Navegar para o formulário de alteração de dados do usuário
          // navigation.navigate('usuario/usuarioForm');
@@ -88,6 +87,14 @@ export default function DrawerNavigator() {
         ),
       }}
     >
+      <Drawer.Screen
+        name="principal/principal"
+        component={Principal}
+        options={{
+          drawerLabel: 'Tela Inicial',
+          title: 'MapeiaVoto',
+        }}
+      />
       <Drawer.Screen
         name="candidato/list"
         component={CandidatoList}
