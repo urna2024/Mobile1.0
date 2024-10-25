@@ -111,31 +111,31 @@ export default function PesquisaEleitoralForm() {
     setLoading(true);
   
     const pesquisaData = {
-      id: 0,
-      dataEntrevista: new Date().toISOString(),
-      uf,
-      municipio,
-      votoIndeciso,
-      votoBrancoNulo,
-      sugestaoMelhoria,
-      idCandidatoPrefeito,  // Agora enviando o ID numérico
-      idCandidatoVereador,  // Agora enviando o ID numérico
-      idUsuario: 1,
-      idStatus: 1,
-      entrevistado: [
+      id: 0,  // Define a pesquisa como nova, ID 0 para criação
+      dataEntrevista: new Date().toISOString(),  // Data da entrevista no formato ISO
+      uf: uf || null,  // UF pode ser nulo
+      municipio: municipio || null,  // Município pode ser nulo
+      votoIndeciso,  // Booleano
+      votoBrancoNulo,  // Booleano
+      sugestaoMelhoria: sugestaoMelhoria || null,  // Sugestão pode ser nula
+      idCandidatoPrefeito: idCandidatoPrefeito > 0 ? idCandidatoPrefeito : null,  // Candidato a Prefeito pode ser nulo
+      idCandidatoVereador: idCandidatoVereador > 0 ? idCandidatoVereador : null,  // Candidato a Vereador pode ser nulo
+      idUsuario: 1,  // ID do usuário (verifique se 1 é válido)
+      idStatus: 1,   // ID do status (verifique se 1 é válido)
+      entrevistado: [  // Lista de entrevistados (neste caso, um único entrevistado)
         {
-          id: 0,
-          nomeCompleto: entrevistadoNome,
-          dataNascimento: formatarDataParaApi(entrevistadoDataNascimento),
-          celular: entrevistadoCelular,
-          uf,
-          municipio,
-          idGenero,
-          idNivelEscolaridade,
-          idRendaFamiliar,
-        },
+          id: 0,  // ID do entrevistado (0 para novo entrevistado)
+          nomeCompleto: entrevistadoNome || null,  // Nome do entrevistado pode ser nulo
+          dataNascimento: formatarDataParaApi(entrevistadoDataNascimento) || null,  // Data de nascimento no formato correto ou nulo
+          uf: uf || null,  // UF do entrevistado pode ser nulo
+          municipio: municipio || null,  // Município do entrevistado pode ser nulo
+          celular: entrevistadoCelular || null,  // Celular pode ser nulo
+          idGenero: idGenero > 0 ? idGenero : null,  // Gênero pode ser nulo
+          idNivelEscolaridade: idNivelEscolaridade > 0 ? idNivelEscolaridade : null,  // Escolaridade pode ser nula
+          idRendaFamiliar: idRendaFamiliar > 0 ? idRendaFamiliar : 0,  // Enviar 0 em vez de null
+        }
       ],
-      request: {}  // Adicionando um campo request vazio
+      request: { origem: 'mobile' }  // Adicionando o campo request conforme exigido pela API
     };
   
     axios.post('http://ggustac-002-site1.htempurl.com/api/PesquisaEleitoral', pesquisaData)
@@ -149,6 +149,8 @@ export default function PesquisaEleitoralForm() {
       })
       .finally(() => setLoading(false));
   };
+  
+  
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <Text style={styles.title}>Pesquisa Eleitoral</Text>

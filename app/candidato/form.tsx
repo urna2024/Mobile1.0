@@ -52,6 +52,7 @@ export default function CandidatoForm() {
 
   useEffect(() => {
     
+    console.log("id = " + id);
     axios.get<Status[]>('http://ggustac-002-site1.htempurl.com/api/Candidato/tipoStatus')
       .then(response => setStatusOptions(response.data))
       .catch(error => console.error('Erro ao carregar status:', error));
