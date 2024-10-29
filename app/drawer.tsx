@@ -9,6 +9,7 @@ import LoginScreen from './login/login1';
 import UsuarioList from './usuario/usuarioList';
 import { useNavigation } from '@react-navigation/native';
 import Principal from './principal/principal';
+import RedefinirSenha from './login/trocarSenha';
 
 
 
@@ -140,6 +141,14 @@ export default function DrawerNavigator() {
         component={LoginScreen}
         options={{
           drawerLabel: 'Login',
+          title: 'MapeiaVoto',
+        }}
+      />
+      <Drawer.Screen
+        name="login/trocarSenha"
+        component={RedefinirSenha}
+        options={{
+          drawerLabel: 'Troca de Senha',
           title: 'MapeiaVoto',
         }}
       />

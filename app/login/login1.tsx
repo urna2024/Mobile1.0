@@ -5,10 +5,11 @@ import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFonts, Cabin_400Regular, Cabin_700Bold } from '@expo-google-fonts/cabin';
 
+
 export default function LoginScreen() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [loading, setLoading] = useState(false); // Para mostrar o estado de carregamento durante o login
+    const [loading, setLoading] = useState(false);
     const router = useRouter();
 
     // Carregar as fontes Cabin
@@ -17,7 +18,6 @@ export default function LoginScreen() {
         Cabin_700Bold,
     });
 
-    // Exibe um indicador de carregamento enquanto as fontes não são carregadas
     if (!fontsLoaded) {
         return (
             <View style={styles.loadingContainer}>
@@ -27,24 +27,32 @@ export default function LoginScreen() {
     }
 
     const handleLogin = async () => {
-        setLoading(true); // Ativa o estado de carregamento
+        setLoading(true);
 
         try {
             const response = await axios.post('http://ggustac-002-site1.htempurl.com/api/Seguranca/Login', {
                 email,
-                senha: password, // Certifique-se de que a API espera 'senha' no corpo da requisição
+                senha: password,
             });
 
             if (response.status === 200) {
                 const token = response.data.token;
-                await AsyncStorage.setItem('token', token); // Armazena o token no AsyncStorage
+                await AsyncStorage.setItem('token', token);
 
-                // Verifica se o token foi armazenado corretamente
                 const storedToken = await AsyncStorage.getItem('token');
-                console.log('Token armazenado:', storedToken); // Certifique-se de que o token foi salvo corretamente
+                console.log('Token armazenado:', storedToken);
 
-                // Redirecionar o usuário para a tela de lista de candidatos
-                router.replace('/candidato/list'); // Usa replace para não manter a página de login no histórico
+                // Verifique se o usuário precisa trocar a senha
+                const precisaTrocarSenha = response.data.precisaTrocarSenha;
+                
+                if (precisaTrocarSenha) {
+                    // Redireciona para a página de troca de senha
+                    router.replace({ pathname: '/login/trocarSenha' });
+                } else {
+                    // Redireciona para a página principal
+                    router.replace('/principal/principal');
+                }
+                
             } else {
                 Alert.alert('Erro', 'Credenciais inválidas. Por favor, tente novamente.');
             }
@@ -52,22 +60,21 @@ export default function LoginScreen() {
             console.error('Erro ao fazer login:', error);
             Alert.alert('Erro', 'Ocorreu um erro durante o login. Verifique sua conexão.');
         } finally {
-            setLoading(false); // Desativa o estado de carregamento após o login
+            setLoading(false);
         }
     };
 
     return (
         <ImageBackground
-            source={require('../../assets/images/fundo.jpg')} 
+            source={require('../../assets/images/fundo.jpg')}
             style={styles.background}
         >
             <View style={styles.overlay}>
                 <Image
-                    source={require('../../assets/images/urna.png')} 
+                    source={require('../../assets/images/urna.png')}
                     style={styles.logo}
                 />
-                
-                {/* Adicionando o nome do sistema acima do login */}
+
                 <Text style={styles.systemTitle}>Sistema de Pesquisa de Votos</Text>
 
                 <Text style={styles.title}>Login</Text>
@@ -93,7 +100,6 @@ export default function LoginScreen() {
                     secureTextEntry
                 />
 
-                {/* Exibir um indicador de carregamento ao pressionar "Entrar" */}
                 {loading ? (
                     <ActivityIndicator size="large" color="#007bff" />
                 ) : (
@@ -116,35 +122,35 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        resizeMode: 'cover', 
+        resizeMode: 'cover',
     },
     overlay: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
         padding: 20,
-        backgroundColor: 'rgba(0, 0, 0, 0.6)', 
+        backgroundColor: 'rgba(0, 0, 0, 0.6)',
         width: '100%',
     },
     logo: {
         width: 180,
         height: 180,
         marginBottom: 30,
-        resizeMode: 'contain', 
+        resizeMode: 'contain',
     },
     systemTitle: {
         fontSize: 24,
         fontWeight: 'bold',
         color: '#fff',
         fontFamily: 'Cabin_700Bold',
-        marginBottom: 10, 
+        marginBottom: 10,
     },
     title: {
         fontSize: 28,
         fontWeight: 'bold',
         color: '#fff',
         marginBottom: 20,
-        fontFamily: 'Cabin_700Bold', 
+        fontFamily: 'Cabin_700Bold',
     },
     label: {
         alignSelf: 'flex-start',
@@ -153,12 +159,12 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: '#fff',
         marginBottom: 5,
-        fontFamily: 'Cabin_400Regular', 
+        fontFamily: 'Cabin_400Regular',
     },
     input: {
         width: '90%',
         height: 50,
-        backgroundColor: 'rgba(255, 255, 255, 0.9)', 
+        backgroundColor: 'rgba(255, 255, 255, 0.9)',
         borderRadius: 8,
         marginBottom: 15,
         paddingHorizontal: 15,
