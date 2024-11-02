@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,useCallback } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, ScrollView, ActivityIndicator, Alert, Image } from 'react-native';
 import axios from 'axios';
 import { Picker } from '@react-native-picker/picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { TouchableOpacity,   } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 
 interface Status {
   id: number;
@@ -80,29 +81,34 @@ export default function CandidatoForm() {
     }
   }, [uf]);
 
-  useEffect(() => {
-    if (id) {
-      setLoading(true);
-      axios.get(`http://ggustac-002-site1.htempurl.com/api/Candidato/${id}/dadosCompletos`)
-        .then(response => {
-          const candidato = response.data;
-          setNomeCompleto(candidato.nomeCompleto);
-          setNomeUrna(candidato.nomeUrna);
-          setDataNascimento(formatDateForDisplay(candidato.dataNascimento));
-          setUf(candidato.uf);
-          setMunicipio(candidato.municipio);
-          setFoto(candidato.foto);
-          setIdStatus(candidato.idStatus);
-          setIdPartidoPolitico(candidato.idPartidoPolitico);
-          setIdCargoDisputado(candidato.idCargoDisputado);
-          setLoading(false);
-        })
-        .catch(error => {
-          console.error('Erro ao buscar detalhes do candidato:', error);
-          setLoading(false);
-        });
-    }
-  }, [id]);
+  
+  
+  useFocusEffect(
+    useCallback(() => {
+      if (id) {
+        setLoading(true);
+        axios.get(`http://ggustac-002-site1.htempurl.com/api/Candidato/${id}/dadosCompletos`)
+          .then(response => {
+            const candidato = response.data;
+            setNomeCompleto(candidato.nomeCompleto);
+            setNomeUrna(candidato.nomeUrna);
+            setDataNascimento(formatDateForDisplay(candidato.dataNascimento));
+            setUf(candidato.uf);
+            setMunicipio(candidato.municipio);
+            setFoto(candidato.foto);
+            setIdStatus(candidato.idStatus);
+            setIdPartidoPolitico(candidato.idPartidoPolitico);
+            setIdCargoDisputado(candidato.idCargoDisputado);
+            setLoading(false);
+          })
+          .catch(error => {
+            console.error('Erro ao buscar detalhes do candidato:', error);
+            setLoading(false);
+          });
+      }
+    }, [id])
+  );
+  
 
   
   const handleDateChange = (text: string) => {
@@ -385,4 +391,3 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
 });
-

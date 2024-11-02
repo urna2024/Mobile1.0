@@ -86,7 +86,7 @@ export default function CandidatoList() {
 
   const renderCandidato = ({ item }: { item: Candidato }) => (
     <View style={styles.candidatoContainer}>
-      <TouchableOpacity onPress={() => router.push({ pathname: './form', params: { id: item.id } })}>
+      <TouchableOpacity onPress={() => router.push({ pathname: '/candidato/form', params: { id: item.id } })}>
         <Text style={styles.candidatoName}>Nome Completo: {item.nomeCompleto}</Text>
         <Text>Nome Urna: {item.nomeUrna}</Text>
         <Text>UF: {item.uf}</Text>
@@ -106,7 +106,7 @@ export default function CandidatoList() {
         </Picker>
 
         {/* Ícone de "olho" para visualizar/editar o candidato */}
-        <TouchableOpacity onPress={() => router.push({ pathname: './form', params: { id: item.id } })}>
+        <TouchableOpacity onPress={() => router.push({ pathname: '/candidato/form', params: { id: item.id } })}>
           <Icon name="eye" size={24} color="#007bff" style={styles.icon} />
         </TouchableOpacity>
       </View>
@@ -118,7 +118,7 @@ export default function CandidatoList() {
       <Text style={styles.title}>Lista de Candidatos</Text>
       
       {/* Botão para cadastrar novo candidato */}
-      <TouchableOpacity style={styles.newButton} onPress={() => router.push('./form')}>
+      <TouchableOpacity style={styles.newButton} onPress={() => router.push('/candidato/form')}>
         <Text style={styles.newButtonText}>Cadastrar Novo Candidato</Text>
       </TouchableOpacity>
 
